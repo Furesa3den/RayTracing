@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="CelShading/CelShading.vcxproj" />
+  <Project Path="CelShading/CelShading.vcxproj" Id="d25a6ce8-7135-42d7-9dbd-32488abe322b" />
 </Solution>

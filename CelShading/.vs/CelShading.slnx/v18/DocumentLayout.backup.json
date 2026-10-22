@@ -3,8 +3,16 @@
   "WorkspaceRootPath": "D:\\VS_project\\RayTracing\\CelShading\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|D:\\VS_project\\RayTracing\\CelShading\\CelShading\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|solutionrelative:CelShading\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\VS_project\\RayTracing\\CelShading\\CelShading\\include\\App.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:CelShading\\include\\App.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\VS_project\\RayTracing\\CelShading\\CelShading\\src\\App.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:CelShading\\src\\App.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|D:\\VS_project\\RayTracing\\CelShading\\CelShading\\src\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|solutionrelative:CelShading\\src\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,19 +22,45 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "main.cpp",
-              "DocumentMoniker": "D:\\VS_project\\RayTracing\\CelShading\\CelShading\\main.cpp",
-              "RelativeDocumentMoniker": "CelShading\\main.cpp",
-              "ToolTip": "D:\\VS_project\\RayTracing\\CelShading\\CelShading\\main.cpp*",
-              "RelativeToolTip": "CelShading\\main.cpp*",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAKAAAAAAAAAA==",
+              "DocumentMoniker": "D:\\VS_project\\RayTracing\\CelShading\\CelShading\\src\\main.cpp",
+              "RelativeDocumentMoniker": "CelShading\\src\\main.cpp",
+              "ToolTip": "D:\\VS_project\\RayTracing\\CelShading\\CelShading\\src\\main.cpp",
+              "RelativeToolTip": "CelShading\\src\\main.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-10-21T11:09:25.146Z",
+              "WhenOpened": "2026-10-22T03:57:29.787Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "App.h",
+              "DocumentMoniker": "D:\\VS_project\\RayTracing\\CelShading\\CelShading\\include\\App.h",
+              "RelativeDocumentMoniker": "CelShading\\include\\App.h",
+              "ToolTip": "D:\\VS_project\\RayTracing\\CelShading\\CelShading\\include\\App.h",
+              "RelativeToolTip": "CelShading\\include\\App.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2026-10-22T04:24:24.611Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "App.cpp",
+              "DocumentMoniker": "D:\\VS_project\\RayTracing\\CelShading\\CelShading\\src\\App.cpp",
+              "RelativeDocumentMoniker": "CelShading\\src\\App.cpp",
+              "ToolTip": "D:\\VS_project\\RayTracing\\CelShading\\CelShading\\src\\App.cpp",
+              "RelativeToolTip": "CelShading\\src\\App.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-10-22T04:23:53.949Z",
               "EditorCaption": ""
             }
           ]

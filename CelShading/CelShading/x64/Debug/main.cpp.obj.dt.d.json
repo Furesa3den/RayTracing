@@ -1,9 +1,10 @@
 {
     "Version": "1.2",
     "Data": {
-        "Source": "d:\\vs_project\\raytracing\\celshading\\celshading\\main.cpp",
+        "Source": "d:\\vs_project\\raytracing\\celshading\\celshading\\src\\main.cpp",
         "ProvidedModule": "",
         "Includes": [
+            "d:\\vs_project\\raytracing\\celshading\\celshading\\include\\app.h",
             "c:\\program files (x86)\\windows kits\\10\\include\\10.0.28000.0\\um\\windows.h",
             "c:\\program files (x86)\\windows kits\\10\\include\\10.0.28000.0\\shared\\winapifamily.h",
             "c:\\program files (x86)\\windows kits\\10\\include\\10.0.28000.0\\shared\\winpackagefamily.h",
@@ -234,13 +235,7 @@
             "c:\\program files (x86)\\windows kits\\10\\include\\10.0.28000.0\\um\\winsvc.h",
             "c:\\program files (x86)\\windows kits\\10\\include\\10.0.28000.0\\um\\mcx.h",
             "c:\\program files (x86)\\windows kits\\10\\include\\10.0.28000.0\\um\\imm.h",
-            "c:\\program files (x86)\\windows kits\\10\\include\\10.0.28000.0\\um\\ime_cmodes.h",
-            "c:\\program files (x86)\\windows kits\\10\\include\\10.0.28000.0\\um\\d3d12.h",
-            "c:\\program files (x86)\\windows kits\\10\\include\\10.0.28000.0\\um\\ocidl.h",
-            "c:\\program files (x86)\\windows kits\\10\\include\\10.0.28000.0\\shared\\dxgicommon.h",
-            "c:\\program files (x86)\\windows kits\\10\\include\\10.0.28000.0\\shared\\dxgiformat.h",
-            "c:\\program files (x86)\\windows kits\\10\\include\\10.0.28000.0\\um\\d3dcommon.h",
-            "c:\\program files (x86)\\windows kits\\10\\include\\10.0.28000.0\\um\\d3d12sdklayers.h"
+            "c:\\program files (x86)\\windows kits\\10\\include\\10.0.28000.0\\um\\ime_cmodes.h"
         ],
         "ImportedModules": [],
         "ImportedHeaderUnits": []
