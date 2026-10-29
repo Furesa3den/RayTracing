@@ -121,9 +121,13 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;$(ProjectDir)external\DirectXTex\Debug\DirectXTex.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;$(ProjectDir)external\DirectXTex\Debug\DirectXTex.lib;$(SolutionDir)packages\assimp_native.4.0.1\build\native\lib\x64\v141\Debug\assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /D "$(SolutionDir)packages\assimp_native.redist.4.0.1\build\native\bin\x64\v141\Debug\assimp-vc140-mt.dll" "$(OutDir)"</Command>
+      <Message>Copying assimp-vc140-mt.dll to output directory</Message>
+    </PostBuildEvent>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
@@ -149,6 +153,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
+    <ClCompile Include="src\AssimpLoader.cpp" />
     <ClCompile Include="src\ConstantBuffer.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
@@ -161,6 +166,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\App.h" />
+    <ClInclude Include="include\AssimpLoader.h" />
     <ClInclude Include="include\ComPtr.h" />
     <ClInclude Include="include\ConstantBuffer.h" />
     <ClInclude Include="include\Engine.h" />

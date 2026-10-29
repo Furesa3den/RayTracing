@@ -7,12 +7,12 @@
       "RelativeMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|solutionrelative:CelShading\\src\\Scene.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\IndexBuffer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|solutionrelative:CelShading\\src\\IndexBuffer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\AssimpLoader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|solutionrelative:CelShading\\src\\AssimpLoader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|D:\\!projects\\RayTracing\\CelShading\\CelShading\\include\\IndexBuffer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|solutionrelative:CelShading\\include\\IndexBuffer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|D:\\!projects\\RayTracing\\CelShading\\CelShading\\include\\AssimpLoader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|solutionrelative:CelShading\\include\\AssimpLoader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -30,9 +30,9 @@
               "Title": "Scene.cpp",
               "DocumentMoniker": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\Scene.cpp",
               "RelativeDocumentMoniker": "CelShading\\src\\Scene.cpp",
-              "ToolTip": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\Scene.cpp*",
-              "RelativeToolTip": "CelShading\\src\\Scene.cpp*",
-              "ViewState": "AgIAAB8AAAAAAAAAAAAUwDgAAAA3AAAAAAAAAA==",
+              "ToolTip": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\Scene.cpp",
+              "RelativeToolTip": "CelShading\\src\\Scene.cpp",
+              "ViewState": "AgIAADMAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-10-27T16:22:32.896Z",
               "IsPinned": true,
@@ -41,28 +41,27 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "IndexBuffer.cpp",
-              "DocumentMoniker": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\IndexBuffer.cpp",
-              "RelativeDocumentMoniker": "CelShading\\src\\IndexBuffer.cpp",
-              "ToolTip": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\IndexBuffer.cpp",
-              "RelativeToolTip": "CelShading\\src\\IndexBuffer.cpp",
-              "ViewState": "AgIAABkAAAAAAAAAAAAkwDIAAABCAAAAAAAAAA==",
+              "Title": "AssimpLoader.cpp",
+              "DocumentMoniker": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\AssimpLoader.cpp",
+              "RelativeDocumentMoniker": "CelShading\\src\\AssimpLoader.cpp",
+              "ToolTip": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\AssimpLoader.cpp",
+              "RelativeToolTip": "CelShading\\src\\AssimpLoader.cpp",
+              "ViewState": "AgIAAFAAAAAAAAAAAAAUwG8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-10-28T15:26:14.552Z",
+              "WhenOpened": "2026-10-29T14:45:03.11Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "IndexBuffer.h",
-              "DocumentMoniker": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\include\\IndexBuffer.h",
-              "RelativeDocumentMoniker": "CelShading\\include\\IndexBuffer.h",
-              "ToolTip": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\include\\IndexBuffer.h",
-              "RelativeToolTip": "CelShading\\include\\IndexBuffer.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAjAAAAAAAAAA==",
+              "Title": "AssimpLoader.h",
+              "DocumentMoniker": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\include\\AssimpLoader.h",
+              "RelativeDocumentMoniker": "CelShading\\include\\AssimpLoader.h",
+              "ToolTip": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\include\\AssimpLoader.h",
+              "RelativeToolTip": "CelShading\\include\\AssimpLoader.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-10-28T15:21:44.03Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-29T14:38:37.243Z"
             }
           ]
         }
