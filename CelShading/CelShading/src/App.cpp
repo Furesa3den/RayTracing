@@ -1,4 +1,6 @@
 #include "App.h"
+#include "Engine.h"
+#include "Scene.h"
 
 HINSTANCE g_hInst;
 HWND g_hWnd = NULL;
@@ -83,7 +85,10 @@ void MainLoop()
 		}
 		else
 		{
-			// 後で描画処理を実行するところ
+			g_Scene->Update(); // 更新処理
+			g_Engine->BeginRender(); // レンダリング開始
+			g_Scene->Draw(); // 描画処理
+			g_Engine->EndRender(); // レンダリング終了
 		}
 	}
 }
@@ -93,7 +98,13 @@ void StartApp(const TCHAR* appName)
 	// ウィンドウ生成
 	InitWindow(appName);
 
-	// 後でここで描画基盤や3Dモデルの初期化を行う
+	// 描画エンジンの初期化
+	g_Engine = new Engine();
+	if (!g_Engine->Init(g_hWnd, WINDOW_WIDTH, WINDOW_HEIGHT)) return;
+
+	// シーンの初期化
+	g_Scene = new Scene();
+	if (!g_Scene->Init()) return;
 
 	// メイン処理ループ
 	MainLoop();

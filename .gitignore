@@ -1,68 +1,172 @@
-# Prerequisites
-*.d
+# ============================================================
+# Visual Studio
+# ============================================================
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.aps
+
+# Visual Studio cache / options
+**/ipch/
+*.VC.db
+*.VC.VC.opendb
+
+# Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# Visual Studio Installer files
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# ============================================================
+# C / C++ Build Artifacts
+# ============================================================
 
 # Compiled Object files
-*.slo
-*.lo
 *.o
 *.obj
+*.lo
+*.slo
 
 # Precompiled Headers
 *.gch
 *.pch
 
-# Linker files
-*.ilk
-
-# Debugger Files
-*.pdb
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-*.so.*
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
+# Static / Dynamic libraries
 *.lib
+*.a
+*.la
+*.lo
+*.dll
+*.so
+*.so.*
+*.dylib
 
 # Executables
 *.exe
 *.out
 *.app
 
-# Build directories
-build/
-Build/
-build-*/
+# Linker / Debug info
+*.ilk
+*.pdb
+*.idb
+*.iobj
+*.ipdb
+*.exp
+*.dwo
 
-# CMake generated files
+# ============================================================
+# MSBuild / Visual C++ Build Output
+# ============================================================
+[Dd]ebug/
+[Rr]elease/
+[Xx]64/
+[Xx]86/
+[Ww]in32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# ============================================================
+# DirectXTex external library (keep headers + .lib, exclude build intermediates)
+# ============================================================
+
+# Re-include the entire external/DirectXTex folder
+!**/external/DirectXTex/
+!**/external/DirectXTex/**
+
+# Exclude build intermediate files inside DirectXTex
+**/external/DirectXTex/**/[Dd]ebug/*.obj
+**/external/DirectXTex/**/[Dd]ebug/*.pch
+**/external/DirectXTex/**/[Dd]ebug/*.pdb
+**/external/DirectXTex/**/[Dd]ebug/*.recipe
+**/external/DirectXTex/**/[Dd]ebug/*.log
+**/external/DirectXTex/**/[Dd]ebug/*.txt
+**/external/DirectXTex/**/[Dd]ebug/*.tlog/
+**/external/DirectXTex/**/[Dd]ebug/**/*.tlog
+**/external/DirectXTex/**/[Rr]elease/*.obj
+**/external/DirectXTex/**/[Rr]elease/*.pch
+**/external/DirectXTex/**/[Rr]elease/*.pdb
+**/external/DirectXTex/**/[Rr]elease/*.recipe
+**/external/DirectXTex/**/[Rr]elease/*.log
+**/external/DirectXTex/**/[Rr]elease/*.txt
+**/external/DirectXTex/**/[Rr]elease/*.tlog/
+**/external/DirectXTex/**/[Rr]elease/**/*.tlog
+
+# MSBuild binary & structured log
+*.binlog
+
+# NuGet packages directory
+packages/
+*.nupkg
+
+# ============================================================
+# DirectX / HLSL
+# ============================================================
+
+# Compiled shader objects
+*.cso
+*.fxo
+
+# DirectX shader debug info
+*.shaderdb
+
+# PIX capture files
+*.wpix
+
+# DXIL / shader cache
+*.dxil
+ShaderCache/
+
+# ============================================================
+# CMake
+# ============================================================
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
-Makefile
 install_manifest.txt
 compile_commands.json
+_deps/
 
-# Temporary files
-*.tmp
-*.log
-*.bak
-*.swp
-
+# ============================================================
 # vcpkg
+# ============================================================
 vcpkg_installed/
 
-# debug information files
-*.dwo
+# ============================================================
+# Temporary / Editor Files
+# ============================================================
+*.tmp
+*.temp
+*.bak
+*.swp
+*.log
+*~
 
-# test output & cache
+# Windows thumbnail cache
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+
+# ============================================================
+# Test / Cache Output
+# ============================================================
 Testing/
 .cache/
+build/
+Build/
+build-*/

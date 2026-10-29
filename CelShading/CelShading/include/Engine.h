@@ -7,8 +7,7 @@
 #pragma comment(lib, "d3d12.lib") // d3d12ライブラリをリンクする
 #pragma comment (lib, "dxgi.lib") // dxgiライブラリをリンクする
 
-class Engine
-{
+class Engine {
 public:
 	enum { FRAME_BUFFER_COUNT = 2 }; // ダブル府バッファリングするので2
 
@@ -40,7 +39,7 @@ private: // 描画に使うDirectX12のオブジェクトたち
 
 	ComPtr<ID3D12Device6> m_pDevice = nullptr; // デバイス
 	ComPtr<ID3D12CommandQueue> m_pQueue = nullptr; // コマンドキュー
-	ComPtr<IDXGISwapChain3> m_pSwapChain = ~nullptr; // スワップチェイン 
+	ComPtr<IDXGISwapChain3> m_pSwapChain = nullptr; // スワップチェイン 
 	ComPtr<ID3D12CommandAllocator> m_pAllocator[FRAME_BUFFER_COUNT] = {nullptr}; // コマンドアロケーたー
 	ComPtr<ID3D12GraphicsCommandList> m_pCommandList = nullptr; // コマンドリスト
 	HANDLE m_fenceEvent = nullptr; // フェンスで使うイベント
