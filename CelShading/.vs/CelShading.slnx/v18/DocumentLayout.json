@@ -7,6 +7,34 @@
       "RelativeMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|solutionrelative:CelShading\\src\\Scene.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\DescriptorHeap.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|solutionrelative:CelShading\\src\\DescriptorHeap.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|D:\\!projects\\RayTracing\\CelShading\\CelShading\\include\\DescriptorHeap.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|solutionrelative:CelShading\\include\\DescriptorHeap.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\Texture2D.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|solutionrelative:CelShading\\src\\Texture2D.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|D:\\!projects\\RayTracing\\CelShading\\CelShading\\include\\Texture2D.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|solutionrelative:CelShading\\include\\Texture2D.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\RootSignature.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|solutionrelative:CelShading\\src\\RootSignature.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|D:\\!projects\\RayTracing\\CelShading\\CelShading\\assets\\shaders\\SimplePS.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|solutionrelative:CelShading\\assets\\shaders\\SimplePS.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|D:\\!projects\\RayTracing\\CelShading\\CelShading\\assets\\shaders\\SimpleVS.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|solutionrelative:CelShading\\assets\\shaders\\SimpleVS.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\AssimpLoader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{D25A6CE8-7135-42D7-9DBD-32488ABE322B}|CelShading\\CelShading.vcxproj|solutionrelative:CelShading\\src\\AssimpLoader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
@@ -32,7 +60,7 @@
               "RelativeDocumentMoniker": "CelShading\\src\\Scene.cpp",
               "ToolTip": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\Scene.cpp",
               "RelativeToolTip": "CelShading\\src\\Scene.cpp",
-              "ViewState": "AgIAADMAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAAAGcAAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-10-27T16:22:32.896Z",
               "IsPinned": true,
@@ -40,7 +68,98 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "RootSignature.cpp",
+              "DocumentMoniker": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\RootSignature.cpp",
+              "RelativeDocumentMoniker": "CelShading\\src\\RootSignature.cpp",
+              "ToolTip": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\RootSignature.cpp",
+              "RelativeToolTip": "CelShading\\src\\RootSignature.cpp",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAA8AAABkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-11-01T16:55:30.725Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Texture2D.cpp",
+              "DocumentMoniker": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\Texture2D.cpp",
+              "RelativeDocumentMoniker": "CelShading\\src\\Texture2D.cpp",
+              "ToolTip": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\Texture2D.cpp",
+              "RelativeToolTip": "CelShading\\src\\Texture2D.cpp",
+              "ViewState": "AgIAAGAAAAAAAAAAAAAAAJMAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-11-01T16:09:59.585Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Texture2D.h",
+              "DocumentMoniker": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\include\\Texture2D.h",
+              "RelativeDocumentMoniker": "CelShading\\include\\Texture2D.h",
+              "ToolTip": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\include\\Texture2D.h",
+              "RelativeToolTip": "CelShading\\include\\Texture2D.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB4AAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2026-11-01T16:02:02.266Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "DescriptorHeap.cpp",
+              "DocumentMoniker": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\DescriptorHeap.cpp",
+              "RelativeDocumentMoniker": "CelShading\\src\\DescriptorHeap.cpp",
+              "ToolTip": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\DescriptorHeap.cpp",
+              "RelativeToolTip": "CelShading\\src\\DescriptorHeap.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-11-01T15:36:05.805Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "DescriptorHeap.h",
+              "DocumentMoniker": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\include\\DescriptorHeap.h",
+              "RelativeDocumentMoniker": "CelShading\\include\\DescriptorHeap.h",
+              "ToolTip": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\include\\DescriptorHeap.h",
+              "RelativeToolTip": "CelShading\\include\\DescriptorHeap.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAA6AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2026-11-01T15:28:32.289Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "SimplePS.hlsl",
+              "DocumentMoniker": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\assets\\shaders\\SimplePS.hlsl",
+              "RelativeDocumentMoniker": "CelShading\\assets\\shaders\\SimplePS.hlsl",
+              "ToolTip": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\assets\\shaders\\SimplePS.hlsl",
+              "RelativeToolTip": "CelShading\\assets\\shaders\\SimplePS.hlsl",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002777|",
+              "WhenOpened": "2026-11-01T15:22:03.382Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "SimpleVS.hlsl",
+              "DocumentMoniker": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\assets\\shaders\\SimpleVS.hlsl",
+              "RelativeDocumentMoniker": "CelShading\\assets\\shaders\\SimpleVS.hlsl",
+              "ToolTip": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\assets\\shaders\\SimpleVS.hlsl",
+              "RelativeToolTip": "CelShading\\assets\\shaders\\SimpleVS.hlsl",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002777|",
+              "WhenOpened": "2026-11-01T15:20:10.903Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
               "Title": "AssimpLoader.cpp",
               "DocumentMoniker": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\src\\AssimpLoader.cpp",
               "RelativeDocumentMoniker": "CelShading\\src\\AssimpLoader.cpp",
@@ -53,7 +172,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 9,
               "Title": "AssimpLoader.h",
               "DocumentMoniker": "D:\\!projects\\RayTracing\\CelShading\\CelShading\\include\\AssimpLoader.h",
               "RelativeDocumentMoniker": "CelShading\\include\\AssimpLoader.h",

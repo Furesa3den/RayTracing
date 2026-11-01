@@ -18,6 +18,7 @@ struct VSOutput
 {
     float4 svpos : SV_Position; // 変換された座標
     float4 color : COLOR; // 変換された色
+    float2 uv : TEXCOORD; // ピクセルシェーダにUVを渡す
 };
 
 VSOutput vert(VSInput input)
@@ -31,6 +32,7 @@ VSOutput vert(VSInput input)
     
     output.svpos = projPos; // 投影変換された座標をピクセルシェーダーに渡す
     output.color = input.color; // 頂点色をそのままピクセルシェーダーに渡す
+    output.uv = input.uv; // 入力からUVを渡す
     
     return output;
 }

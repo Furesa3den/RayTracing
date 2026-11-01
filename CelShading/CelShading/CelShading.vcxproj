@@ -155,6 +155,7 @@
     <ClCompile Include="src\App.cpp" />
     <ClCompile Include="src\AssimpLoader.cpp" />
     <ClCompile Include="src\ConstantBuffer.cpp" />
+    <ClCompile Include="src\DescriptorHeap.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -162,6 +163,7 @@
     <ClCompile Include="src\RootSignature.cpp" />
     <ClCompile Include="src\Scene.cpp" />
     <ClCompile Include="src\SharedStruct.cpp" />
+    <ClCompile Include="src\Texture2D.cpp" />
     <ClCompile Include="src\VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -169,12 +171,14 @@
     <ClInclude Include="include\AssimpLoader.h" />
     <ClInclude Include="include\ComPtr.h" />
     <ClInclude Include="include\ConstantBuffer.h" />
+    <ClInclude Include="include\DescriptorHeap.h" />
     <ClInclude Include="include\Engine.h" />
     <ClInclude Include="include\IndexBuffer.h" />
     <ClInclude Include="include\PipelineState.h" />
     <ClInclude Include="include\RootSignature.h" />
     <ClInclude Include="include\Scene.h" />
     <ClInclude Include="include\SharedStruct.h" />
+    <ClInclude Include="include\Texture2D.h" />
     <ClInclude Include="include\VertexBuffer.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
