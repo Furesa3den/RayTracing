@@ -81,7 +81,7 @@ bool Scene::Init() {
 		indexBuffers.push_back(pIB);
 	}
 
-	auto eyePos = XMVectorSet(0.0f, 120.0f, 75.0f, 0.0f); // 視点の位置
+	auto eyePos = XMVectorSet(0.0f, 150.0f, 75.0f, 0.0f); // 視点の位置
 	auto targetPos = XMVectorSet(0.0f, 120.0f, 0.0f, 0.0f); // 視点を向ける座標
 	auto upward = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f); // 上方向を表すベクトル
 	auto fov = XMConvertToRadians(60); // 視野角
@@ -148,22 +148,50 @@ void Scene::Draw() {
 	auto commandList = g_Engine->CommandList();
 	auto materialHeap = descriptorHeap->GetHeap(); // ディスクリプタヒープ
 
-	// メッシュの数だけインデックス分の描画を行う処理を回す
-	for (size_t i = 0; i < meshes.size();i++) {
-		auto vbView = vertexBuffers[i]->View(); // そのメッシュに対応する頂点バッファ
-		auto ibView = indexBuffers[i]->View(); // そのメッシュに対応するインデックスバッファ
+	if (m_raster)
+	{
+		// メッシュの数だけインデックス分の描画を行う処理を回す
+		for (size_t i = 0; i < meshes.size(); i++)
+		{
+			auto vbView = vertexBuffers[i]->View(); // そのメッシュに対応する頂点バッファ
+			auto ibView = indexBuffers[i]->View(); // そのメッシュに対応するインデックスバッファ
 
-		commandList->SetGraphicsRootSignature(rootSignature->Get());
-		commandList->SetPipelineState(pipelineState->Get());
-		commandList->SetGraphicsRootConstantBufferView(0, constantBuffer[currentIndex]->GetAddress());
+			commandList->SetGraphicsRootSignature(rootSignature->Get());
+			commandList->SetPipelineState(pipelineState->Get());
+			commandList->SetGraphicsRootConstantBufferView(0, constantBuffer[currentIndex]->GetAddress());
 
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		commandList->IASetVertexBuffers(0, 1, &vbView);
-		commandList->IASetIndexBuffer(&ibView);
+			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			commandList->IASetVertexBuffers(0, 1, &vbView);
+			commandList->IASetIndexBuffer(&ibView);
 
-		commandList->SetDescriptorHeaps(1, &materialHeap); // 使用するディスクリプタヒープをセット
-		commandList->SetGraphicsRootDescriptorTable(1, materialHandles[i]->HandleGPU); // そのメッシュに対応するディスクリプタテーブルをセット
+			commandList->SetDescriptorHeaps(1, &materialHeap); // 使用するディスクリプタヒープをセット
+			commandList->SetGraphicsRootDescriptorTable(1, materialHandles[i]->HandleGPU); // そのメッシュに対応するディスクリプタテーブルをセット
 
-		commandList->DrawIndexedInstanced(meshes[i].Indices.size(), 1, 0, 0, 0); // インデックスの数分描画する
+			commandList->DrawIndexedInstanced(meshes[i].Indices.size(), 1, 0, 0, 0); // インデックスの数分描画する
+		}
 	}
+	else
+	{
+		// メッシュの数だけインデックス分の描画を行う処理を回す
+		for (size_t i = 0; i < meshes.size(); i++)
+		{
+			auto vbView = vertexBuffers[i]->View(); // そのメッシュに対応する頂点バッファ
+			auto ibView = indexBuffers[i]->View(); // そのメッシュに対応するインデックスバッファ
+
+			commandList->SetGraphicsRootSignature(rootSignature->Get());
+			commandList->SetPipelineState(pipelineState->Get());
+			commandList->SetGraphicsRootConstantBufferView(0, constantBuffer[currentIndex]->GetAddress());
+
+			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			commandList->IASetVertexBuffers(0, 1, &vbView);
+			commandList->IASetIndexBuffer(&ibView);
+
+			commandList->DrawIndexedInstanced(meshes[i].Indices.size(), 1, 0, 0, 0); // インデックスの数分描画する
+		}
+	}
+}
+
+void Scene::SwitchRendering()
+{
+	m_raster = !m_raster;
 }

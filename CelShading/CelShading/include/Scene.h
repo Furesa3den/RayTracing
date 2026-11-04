@@ -6,6 +6,11 @@ public:
 
 	void Update(); // 更新処理
 	void Draw(); // 描画処理
+
+	void SwitchRendering(); // レンダリングの切り替え
+
+private:
+	bool m_raster = false;
 };
 
 extern Scene* g_Scene;
