@@ -1,6 +1,7 @@
-#include "App.h"
-#include "Engine.h"
-#include "Scene.h"
+#include "Core/App.h"
+#include "Core/Engine.h"
+#include "Scene/RasterScene.h"
+#include "Scene/RayTracingScene.h"
 
 HINSTANCE g_hInst;
 HWND g_hWnd = NULL;
@@ -78,7 +79,7 @@ void MainLoop()
 	MSG msg = {};
 	while (WM_QUIT != msg.message)
 	{
-		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE == TRUE))
+		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
@@ -103,7 +104,7 @@ void StartApp(const TCHAR* appName)
 	if (!g_Engine->Init(g_hWnd, WINDOW_WIDTH, WINDOW_HEIGHT)) return;
 
 	// シーンの初期化
-	g_Scene = new Scene();
+	g_Scene = new RayTracingScene();
 	if (!g_Scene->Init()) return;
 
 	// メイン処理ループ

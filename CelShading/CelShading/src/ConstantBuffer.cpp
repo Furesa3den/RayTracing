@@ -1,5 +1,6 @@
 #include "ConstantBuffer.h"
-#include "Engine.h"
+#include "Core/Engine.h"
+#include "Core/App.h"
 
 ConstantBuffer::ConstantBuffer(size_t size) {
 	size_t align = D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
@@ -18,13 +19,13 @@ ConstantBuffer::ConstantBuffer(size_t size) {
 		IID_PPV_ARGS(m_pBuffer.GetAddressOf())
 	);
 	if (FAILED(hr)) {
-		printf("定数バッファリソースの生成に失敗\n");
+		DebugLog("定数バッファリソースの生成に失敗\n");
 		return;
 	}
 
 	hr = m_pBuffer->Map(0, nullptr, &m_pMappedPtr);
 	if (FAILED(hr)) {
-		printf("定数バッファのマッピングに失敗\n");
+		DebugLog("定数バッファのマッピングに失敗\n");
 		return;
 	}
 

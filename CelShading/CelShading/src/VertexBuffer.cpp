@@ -1,5 +1,6 @@
 #include "VertexBuffer.h"
-#include "Engine.h"
+#include "Core/Engine.h"
+#include "Core/App.h"
 #include <d3dx12.h>
 
 VertexBuffer::VertexBuffer(size_t size, size_t stride, const void* pInitData) {
@@ -17,7 +18,7 @@ VertexBuffer::VertexBuffer(size_t size, size_t stride, const void* pInitData) {
 	);
 
 	if (FAILED(hr)) {
-		printf("頂点バッファリソースの生成に失敗");
+		DebugLog("頂点バッファリソースの生成に失敗\n");
 		return;
 	}
 
@@ -32,7 +33,7 @@ VertexBuffer::VertexBuffer(size_t size, size_t stride, const void* pInitData) {
 		hr = m_pBuffer->Map(0, nullptr, &ptr);
 
 		if (FAILED(hr)) {
-			printf("頂点バッファマッピングに失敗");
+			DebugLog("頂点バッファマッピングに失敗\n");
 			return;
 		}
 
@@ -49,3 +50,5 @@ VertexBuffer::VertexBuffer(size_t size, size_t stride, const void* pInitData) {
 D3D12_VERTEX_BUFFER_VIEW VertexBuffer::View() const { return m_View; }
 
 bool VertexBuffer::IsValid() { return m_IsValid; }
+
+ID3D12Resource* VertexBuffer::GetResource() const { return m_pBuffer.Get(); }

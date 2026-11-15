@@ -1,6 +1,6 @@
 #pragma once
 #include <d3dx12.h>
-#include "ComPtr.h"
+#include "Core/ComPtr.h"
 
 class ConstantBuffer {
 public:

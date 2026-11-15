@@ -1,5 +1,6 @@
 #include "AssimpLoader.h"
 #include "SharedStruct.h"
+#include "Core/App.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -62,8 +63,7 @@ bool AssimpLoader::Load(ImportSettings settings) {
 
 	if (scene == nullptr) {
 		// もし読み込みエラーが出たら表示する
-		printf(importer.GetErrorString());
-		printf("\n");
+		DebugLog("%s\n", importer.GetErrorString());
 		return false;
 	}
 

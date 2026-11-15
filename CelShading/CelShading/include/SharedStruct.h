@@ -1,7 +1,7 @@
 #pragma once
 #include <d3dx12.h>
 #include <DirectXMath.h>
-#include "ComPtr.h"
+#include "Core/ComPtr.h"
 
 struct Vertex {
 public:

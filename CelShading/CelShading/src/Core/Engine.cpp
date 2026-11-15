@@ -1,4 +1,5 @@
-#include "Engine.h"
+#include "Core/Engine.h"
+#include "Core/App.h"
 #include <d3d12.h>
 #include <stdio.h>
 #include <Windows.h>
@@ -22,6 +23,10 @@ UINT Engine::CurrentBackBufferIndex() {
 	return m_CurrentBackBufferIndex;
 }
 
+ID3D12Resource* Engine::GetCurrentRenderTarget() {
+	return m_pRenderTargets[m_CurrentBackBufferIndex].Get();
+}
+
 #pragma endregion
 
 
@@ -33,27 +38,27 @@ bool Engine::Init(HWND hwnd, UINT windowWidth, UINT windowHeight) {
 	m_hWnd = hwnd;
 
 	if (!CreateDevice()) {
-		printf("デバイスの生成に失敗\n");
+		DebugLog("デバイスの生成に失敗\n");
 		return false;
 	}
 
 	if (!CreateCommandQueue()) {
-		printf("コマンドキューの生成に失敗\n");
+		DebugLog("コマンドキューの生成に失敗\n");
 		return false;
 	}
 
 	if (!CreateSwapChain()) {
-		printf("スワップチェインの生成に失敗\n");
+		DebugLog("スワップチェインの生成に失敗\n");
 		return false;
 	}
 
 	if (!CreateCommandList()) {
-		printf("コマンドリストの生成に失敗\n");
+		DebugLog("コマンドリストの生成に失敗\n");
 		return false;
 	}
 
 	if (!CreateFence()) {
-		printf("フェンスの生成に失敗\n");
+		DebugLog("フェンスの生成に失敗\n");
 		return false;
 	}
 
@@ -62,16 +67,16 @@ bool Engine::Init(HWND hwnd, UINT windowWidth, UINT windowHeight) {
 	CreateScissorRect();
 
 	if (!CreateRenderTarget()) {
-		printf("レンダーターゲットの生成に失敗\n");
+		DebugLog("レンダーターゲットの生成に失敗\n");
 		return false;
 	}
 
 	if (!CreateDepthStencil()) {
-		printf("深度ステンシルバッファの生成に失敗\n");
+		DebugLog("深度ステンシルバッファの生成に失敗\n");
 		return false;
 	}
 
-	printf("描画エンジンの初期化に成功\n");
+	DebugLog("描画エンジンの初期化に成功\n");
 	return true;
 }
 

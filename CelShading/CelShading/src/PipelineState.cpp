@@ -1,5 +1,6 @@
 #include "PipelineState.h"
-#include "Engine.h"
+#include "Core/Engine.h"
+#include "Core/App.h"
 #include <d3dx12.h>
 #include <d3dcompiler.h>
 
@@ -35,7 +36,7 @@ void PipelineState::SetVS(std::wstring filePath) {
 	auto hr = D3DReadFileToBlob(filePath.c_str(), m_pVsBlob.GetAddressOf());
 
 	if (FAILED(hr)) {
-		printf("頂点シェーダーの読み込みに失敗");
+		DebugLog("頂点シェーダーの読み込みに失敗\n");
 		return;
 	}
 
@@ -47,7 +48,7 @@ void PipelineState::SetPS(std::wstring filePath) {
 	auto hr = D3DReadFileToBlob(filePath.c_str(), m_pPSBlob.GetAddressOf());
 
 	if (FAILED(hr)) {
-		printf("ピクセルシェーダーの読み込みに失敗");
+		DebugLog("ピクセルシェーダーの読み込みに失敗\n");
 		return;
 	}
 
@@ -59,7 +60,7 @@ void PipelineState::Create() {
 	auto hr = g_Engine->Device()->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(m_pPipelineState.ReleaseAndGetAddressOf()));
 
 	if (FAILED(hr)) {
-		printf("パイプラインステートの生成に失敗");
+		DebugLog("パイプラインステートの生成に失敗\n");
 		return;
 	}
 

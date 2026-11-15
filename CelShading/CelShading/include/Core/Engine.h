@@ -2,7 +2,7 @@
 #include <d3d12.h>
 #include <dxgi.h>
 #include <dxgi1_4.h>
-#include "ComPtr.h"
+#include "Core/ComPtr.h"
 
 #pragma comment(lib, "d3d12.lib") // d3d12ライブラリをリンクする
 #pragma comment (lib, "dxgi.lib") // dxgiライブラリをリンクする
@@ -21,6 +21,7 @@ public: // 外からアクセスしたいのでGetterとして公開するもの
 	ID3D12Device6* Device();
 	ID3D12GraphicsCommandList* CommandList();
 	UINT CurrentBackBufferIndex();
+	ID3D12Resource* GetCurrentRenderTarget(); // 現在のバックバッファリソース（DXRコピー用）
 
 private: // DirectX12初期化に使う関数たち
 	bool CreateDevice(); // デバイスを生成

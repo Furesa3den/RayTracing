@@ -125,12 +125,21 @@
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y /D "$(SolutionDir)packages\assimp_native.redist.4.0.1\build\native\bin\x64\v141\Debug\assimp-vc140-mt.dll" "$(OutDir)"</Command>
-      <Message>Copying assimp-vc140-mt.dll to output directory</Message>
+      <Command>xcopy /Y /D "$(SolutionDir)packages\assimp_native.redist.4.0.1\build\native\bin\x64\v141\Debug\assimp-vc140-mt.dll" "$(OutDir)"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.28000.0\x64\dxc.exe" -T lib_6_3 -Zi -Fo "$(OutDir)RayGen.cso"     "$(ProjectDir)assets\shaders\RayGen.hlsl"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.28000.0\x64\dxc.exe" -T lib_6_3 -Zi -Fo "$(OutDir)Miss.cso"       "$(ProjectDir)assets\shaders\Miss.hlsl"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.28000.0\x64\dxc.exe" -T lib_6_3 -Zi -Fo "$(OutDir)ClosestHit.cso" "$(ProjectDir)assets\shaders\ClosestHit.hlsl"</Command>
+      <Message>Copying DLLs and compiling DXR shaders...</Message>
     </PostBuildEvent>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
+    <FxCompile>
+      <ShaderType>Library</ShaderType>
+    </FxCompile>
+    <FxCompile>
+      <ShaderModel>6.3</ShaderModel>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -150,33 +159,45 @@
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
+    <FxCompile>
+      <ShaderType>Library</ShaderType>
+    </FxCompile>
+    <FxCompile>
+      <ShaderModel>6.3</ShaderModel>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\App.cpp" />
+    <ClCompile Include="src\Core\App.cpp" />
     <ClCompile Include="src\AssimpLoader.cpp" />
     <ClCompile Include="src\ConstantBuffer.cpp" />
     <ClCompile Include="src\DescriptorHeap.cpp" />
-    <ClCompile Include="src\Engine.cpp" />
+    <ClCompile Include="src\Core\Engine.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
-    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Core\main.cpp" />
+    <ClCompile Include="src\Objects\Model.cpp" />
     <ClCompile Include="src\PipelineState.cpp" />
     <ClCompile Include="src\RootSignature.cpp" />
-    <ClCompile Include="src\Scene.cpp" />
+    <ClCompile Include="src\Scene\RasterScene.cpp" />
+    <ClCompile Include="src\Scene\RayTracingScene.cpp" />
+    <ClCompile Include="src\Scene\Scene.cpp" />
     <ClCompile Include="src\SharedStruct.cpp" />
     <ClCompile Include="src\Texture2D.cpp" />
     <ClCompile Include="src\VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\App.h" />
+    <ClInclude Include="include\Core\App.h" />
     <ClInclude Include="include\AssimpLoader.h" />
-    <ClInclude Include="include\ComPtr.h" />
+    <ClInclude Include="include\Core\ComPtr.h" />
     <ClInclude Include="include\ConstantBuffer.h" />
     <ClInclude Include="include\DescriptorHeap.h" />
-    <ClInclude Include="include\Engine.h" />
+    <ClInclude Include="include\Core\Engine.h" />
     <ClInclude Include="include\IndexBuffer.h" />
+    <ClInclude Include="include\Objects\Model.h" />
     <ClInclude Include="include\PipelineState.h" />
+    <ClInclude Include="include\Scene\RasterScene.h" />
+    <ClInclude Include="include\Scene\RayTracingScene.h" />
     <ClInclude Include="include\RootSignature.h" />
-    <ClInclude Include="include\Scene.h" />
+    <ClInclude Include="include\Scene\Scene.h" />
     <ClInclude Include="include\SharedStruct.h" />
     <ClInclude Include="include\Texture2D.h" />
     <ClInclude Include="include\VertexBuffer.h" />
@@ -209,6 +230,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="assets\shaders\RayGen.hlsl" />
+    <None Include="assets\shaders\Miss.hlsl" />
+    <None Include="assets\shaders\ClosestHit.hlsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

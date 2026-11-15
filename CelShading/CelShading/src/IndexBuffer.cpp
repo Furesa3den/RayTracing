@@ -1,6 +1,7 @@
 #include "IndexBuffer.h"
 #include <d3dx12.h>
-#include "Engine.h"
+#include "Core/Engine.h"
+#include "Core/App.h"
 
 IndexBuffer::IndexBuffer(size_t size, const uint32_t* pInitData) {
 	auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD); // ヒーププロパティ
@@ -17,7 +18,7 @@ IndexBuffer::IndexBuffer(size_t size, const uint32_t* pInitData) {
 	);
 
 	if (FAILED(hr)) {
-		printf("[OnInit] インデックスバッファリソースの生成に失敗");
+		DebugLog("[OnInit] インデックスバッファリソースの生成に失敗\n");
 		return;
 	}
 
@@ -33,7 +34,7 @@ IndexBuffer::IndexBuffer(size_t size, const uint32_t* pInitData) {
 		hr = m_pBuffer->Map(0, nullptr, &ptr);
 
 		if (FAILED(hr)) {
-			printf("[OnInit] インデックスバッファマッピングに失敗");
+			DebugLog("[OnInit] インデックスバッファマッピングに失敗\n");
 			return;
 		}
 
@@ -49,3 +50,5 @@ IndexBuffer::IndexBuffer(size_t size, const uint32_t* pInitData) {
 bool IndexBuffer::IsValid() { return m_IsValid; }
 
 D3D12_INDEX_BUFFER_VIEW IndexBuffer::View() const { return m_View; }
+
+ID3D12Resource* IndexBuffer::GetResource() const { return m_pBuffer.Get(); }

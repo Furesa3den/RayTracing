@@ -1,5 +1,6 @@
 #include "RootSignature.h"
-#include "Engine.h"
+#include "Core/Engine.h"
+#include "Core/App.h"
 #include <d3dx12.h>
 
 RootSignature::RootSignature() {
@@ -38,7 +39,7 @@ RootSignature::RootSignature() {
 	);
 
 	if (FAILED(hr)) {
-		printf("ルートシグネチャシリアライズに失敗");
+		DebugLog("ルートシグネチャシリアライズに失敗\n");
 		return;
 	}
 
@@ -51,7 +52,7 @@ RootSignature::RootSignature() {
 	);
 
 	if (FAILED(hr)) {
-		printf("ルートシグネチャの生成に失敗");
+		DebugLog("ルートシグネチャの生成に失敗\n");
 		return;
 	}
 
