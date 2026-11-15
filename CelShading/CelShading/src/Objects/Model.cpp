@@ -41,10 +41,30 @@ Objects::Model::Model(const wchar_t* filePath) {
 void Objects::Model::LoadMaterial(DescriptorHeap* descriptorHeap) {
 	m_materialHandles.clear();
 	for (size_t i = 0; i < m_meshes.size(); i++) {
-		auto texPath = ReplaceExtension(m_meshes[i].DiffuseMap, "tga"); // psdではなく同梱のtgaを読み込む
+		auto texPath = ReplaceExtension(m_meshes[i].DiffuseMap, "tga");
 		auto mainTex = Texture2D::Get(texPath);
 		auto handle = descriptorHeap->Register(mainTex);
 		m_materialHandles.push_back(handle);
+	}
+}
+
+// DXR 用: シェーダービジブルなヒープに直接 SRV を書き込む
+void Objects::Model::LoadMaterial(
+	ComPtr<ID3D12DescriptorHeap>& heap,
+	UINT incrementSize,
+	UINT slotBegin,
+	UINT slotStride)
+{
+	auto device = g_Engine->Device();
+	for (size_t i = 0; i < m_meshes.size(); i++) {
+		auto texPath = ReplaceExtension(m_meshes[i].DiffuseMap, "tga");
+		auto mainTex = Texture2D::Get(texPath);
+
+		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = heap->GetCPUDescriptorHandleForHeapStart();
+		cpuHandle.ptr += (slotBegin + i * slotStride) * incrementSize;
+
+		auto srvDesc = mainTex->ViewDesc();
+		device->CreateShaderResourceView(mainTex->Resource(), &srvDesc, cpuHandle);
 	}
 }
 

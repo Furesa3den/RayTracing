@@ -68,10 +68,7 @@ bool RayTracingScene::Init()
     // ── モデル読み込み ──────────────────────────────────────────────────────
     fbxModel = new Objects::Model(L"assets/models/Alicia/Alicia_solid_Unity.FBX");
 
-    // ── 頂点・インデックスバッファ ──────────────────────────────────────────
-    fbxModel->GetVertexBuffers();
-
-    fbxModel->GetIndexBuffers();
+    // テクスチャはDXRヒープ生成後にロードするため、ここではモデルデータのみ
 
     // ── 定数バッファ ────────────────────────────────────────────────────────
     for (size_t i = 0; i < Engine::FRAME_BUFFER_COUNT; i++) {
@@ -254,6 +251,9 @@ bool RayTracingScene::Init()
     if (!CreateOutputBuffer())       { return false; }
     if (!CreateDxrDescriptorHeap())  { return false; }
 
+    // ── テクスチャロード（ヒープ生成後に行う） ──────────────────────────────
+    fbxModel->LoadMaterial(m_dxrDescHeap, m_dxrDescIncrementSize, SLOT_TEX_BEGIN, SLOT_PER_MESH);
+
     // ── シェーダーテーブル ──────────────────────────────────────────────────
     if (!BuildShaderTable())         { return false; }
 
@@ -282,7 +282,7 @@ void RayTracingScene::Update()
     auto cb = m_rayTracingCB[currentIndex]->GetPtr<RayTracingCB>();
     cb->ViewInv = XMMatrixInverse(nullptr, view);
     cb->ProjInv = XMMatrixInverse(nullptr, proj);
-    cb->LightDir = { -0.577f, 0.577f, -0.577f }; // 左上から照らす平行光源
+    cb->LightDir = { 0.577f, -0.577f, -0.577f }; // 光の進行方向。左上手前から照らす平行光源
     cb->Padding = 0.0f;
 }
 
@@ -331,9 +331,9 @@ void RayTracingScene::Draw()
     dispatchDesc.MissShaderTable.StartAddress = m_missTable->GetGPUVirtualAddress();
     dispatchDesc.MissShaderTable.SizeInBytes = recordSize;
     dispatchDesc.MissShaderTable.StrideInBytes = recordSize;
-    dispatchDesc.HitGroupTable.StartAddress = m_hitGroupTable->GetGPUVirtualAddress();
-    dispatchDesc.HitGroupTable.SizeInBytes = recordSize * static_cast<UINT>(fbxModel->GetMeshes().size());
-    dispatchDesc.HitGroupTable.StrideInBytes = recordSize;
+    dispatchDesc.HitGroupTable.StartAddress  = m_hitGroupTable->GetGPUVirtualAddress();
+    dispatchDesc.HitGroupTable.SizeInBytes   = m_hitGroupRecordSize * static_cast<UINT>(fbxModel->GetMeshes().size());
+    dispatchDesc.HitGroupTable.StrideInBytes = m_hitGroupRecordSize;
     dispatchDesc.Width = WINDOW_WIDTH;
     dispatchDesc.Height = WINDOW_HEIGHT;
     dispatchDesc.Depth = 1;
@@ -372,45 +372,82 @@ void RayTracingScene::Draw()
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  グローバルルートシグネチャ
+//  グローバル / ローカルルートシグネチャ
 //
-//  スロット割り当て:
+//  グローバルスロット:
 //    0: DescriptorTable → UAV (u0)  出力画像
 //    1: DescriptorTable → SRV (t0)  TLAS
 //    2: CBV (b0)                    カメラ / ライト定数
+//
+//  ローカルスロット（ヒットグループ専用、シェーダーテーブルに埋め込む）:
+//    0: DescriptorTable → SRV (t1)  テクスチャ (space1)
 // ─────────────────────────────────────────────────────────────────────────────
 bool RayTracingScene::CreateRootSignature()
 {
-    CD3DX12_ROOT_PARAMETER params[3] = {};
+    // ── グローバルルートシグネチャ ─────────────────────────────────────────
+    {
+        CD3DX12_ROOT_PARAMETER params[3] = {};
 
-    CD3DX12_DESCRIPTOR_RANGE uavRange(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0);
-    params[0].InitAsDescriptorTable(1, &uavRange);
+        CD3DX12_DESCRIPTOR_RANGE uavRange(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0);
+        params[0].InitAsDescriptorTable(1, &uavRange);
 
-    CD3DX12_DESCRIPTOR_RANGE srvRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
-    params[1].InitAsDescriptorTable(1, &srvRange);
+        CD3DX12_DESCRIPTOR_RANGE srvRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+        params[1].InitAsDescriptorTable(1, &srvRange);
 
-    params[2].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
+        params[2].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
 
-    D3D12_ROOT_SIGNATURE_DESC desc = {};
-    desc.NumParameters = _countof(params);
-    desc.pParameters   = params;
-    desc.Flags         = D3D12_ROOT_SIGNATURE_FLAG_NONE; // DXRではIAフラグ不要
+        D3D12_ROOT_SIGNATURE_DESC desc = {};
+        desc.NumParameters = _countof(params);
+        desc.pParameters   = params;
+        desc.Flags         = D3D12_ROOT_SIGNATURE_FLAG_NONE;
 
-    ComPtr<ID3DBlob> sigBlob, errBlob;
-    HRESULT hr = D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1_0,
-        sigBlob.GetAddressOf(), errBlob.GetAddressOf());
-    if (FAILED(hr)) {
-        DebugLog("グローバルルートシグネチャのシリアライズに失敗\n");
-        return false;
+        ComPtr<ID3DBlob> sigBlob, errBlob;
+        HRESULT hr = D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1_0,
+            sigBlob.GetAddressOf(), errBlob.GetAddressOf());
+        if (FAILED(hr)) { DebugLog("グローバルルートシグネチャのシリアライズに失敗\n"); return false; }
+
+        hr = g_Engine->Device()->CreateRootSignature(
+            0, sigBlob->GetBufferPointer(), sigBlob->GetBufferSize(),
+            IID_PPV_ARGS(m_globalRootSignature.GetAddressOf()));
+        if (FAILED(hr)) { DebugLog("グローバルルートシグネチャの生成に失敗\n"); return false; }
     }
 
-    hr = g_Engine->Device()->CreateRootSignature(
-        0, sigBlob->GetBufferPointer(), sigBlob->GetBufferSize(),
-        IID_PPV_ARGS(m_globalRootSignature.GetAddressOf()));
-    if (FAILED(hr)) {
-        DebugLog("グローバルルートシグネチャの生成に失敗\n");
-        return false;
+    // ── ローカルルートシグネチャ（ClosestHit 専用、テクスチャを渡す） ────────
+    {
+        // t1(テクスチャ), t2(頂点バッファ), t3(インデックスバッファ) を space1 に
+        // 連続した3ディスクリプタとして1つのテーブルで渡す
+        CD3DX12_DESCRIPTOR_RANGE texRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 1, 1);
+        CD3DX12_ROOT_PARAMETER localParam = {};
+        localParam.InitAsDescriptorTable(1, &texRange);
+
+        // スタティックサンプラー (s0, space1)
+        D3D12_STATIC_SAMPLER_DESC samplerDesc = {};
+        samplerDesc.Filter           = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+        samplerDesc.AddressU         = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDesc.AddressV         = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDesc.AddressW         = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDesc.ShaderRegister   = 0;
+        samplerDesc.RegisterSpace    = 1; // space1
+        samplerDesc.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+        D3D12_ROOT_SIGNATURE_DESC localDesc = {};
+        localDesc.NumParameters     = 1;
+        localDesc.pParameters       = &localParam;
+        localDesc.NumStaticSamplers = 1;
+        localDesc.pStaticSamplers   = &samplerDesc;
+        localDesc.Flags             = D3D12_ROOT_SIGNATURE_FLAG_LOCAL_ROOT_SIGNATURE;
+
+        ComPtr<ID3DBlob> sigBlob, errBlob;
+        HRESULT hr = D3D12SerializeRootSignature(&localDesc, D3D_ROOT_SIGNATURE_VERSION_1_0,
+            sigBlob.GetAddressOf(), errBlob.GetAddressOf());
+        if (FAILED(hr)) { DebugLog("ローカルルートシグネチャのシリアライズに失敗\n"); return false; }
+
+        hr = g_Engine->Device()->CreateRootSignature(
+            0, sigBlob->GetBufferPointer(), sigBlob->GetBufferSize(),
+            IID_PPV_ARGS(m_localRootSignature.GetAddressOf()));
+        if (FAILED(hr)) { DebugLog("ローカルルートシグネチャの生成に失敗\n"); return false; }
     }
+
     return true;
 }
 
@@ -486,6 +523,19 @@ bool RayTracingScene::CreateRaytracingPipeline()
     D3D12_GLOBAL_ROOT_SIGNATURE globalRS = { m_globalRootSignature.Get() };
     subObjects.push_back({ D3D12_STATE_SUBOBJECT_TYPE_GLOBAL_ROOT_SIGNATURE, &globalRS });
 
+    // ── ローカルルートシグネチャ（ClosestHit に関連付け） ───────────────────
+    D3D12_LOCAL_ROOT_SIGNATURE localRS = { m_localRootSignature.Get() };
+    D3D12_STATE_SUBOBJECT localRSSub = { D3D12_STATE_SUBOBJECT_TYPE_LOCAL_ROOT_SIGNATURE, &localRS };
+    subObjects.push_back(localRSSub);
+
+    // ローカルルートシグネチャを HitGroup に関連付ける
+    const wchar_t* hitGroupExports[] = { kHitGroupName };
+    D3D12_SUBOBJECT_TO_EXPORTS_ASSOCIATION localAssoc = {};
+    localAssoc.pSubobjectToAssociate = &subObjects.back(); // 直前のローカルRS
+    localAssoc.NumExports            = 1;
+    localAssoc.pExports              = hitGroupExports;
+    subObjects.push_back({ D3D12_STATE_SUBOBJECT_TYPE_SUBOBJECT_TO_EXPORTS_ASSOCIATION, &localAssoc });
+
     // ── StateObject 生成（ID3D12Device5 経由） ─────────────────────────────
     D3D12_STATE_OBJECT_DESC soDesc = {};
     soDesc.Type          = D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE;
@@ -537,25 +587,26 @@ bool RayTracingScene::CreateOutputBuffer()
 //  DXR 用ディスクリプタヒープの生成とビュー登録
 //
 //  スロット:
-//    SLOT_OUTPUT_UAV  出力画像  UAV
-//    SLOT_TLAS_SRV    TLAS      SRV
+//    SLOT_OUTPUT_UAV (0)  出力画像  UAV
+//    SLOT_TLAS_SRV   (1)  TLAS      SRV
+//    SLOT_TEX_BEGIN  (2～) テクスチャ SRV × メッシュ数
 // ─────────────────────────────────────────────────────────────────────────────
 bool RayTracingScene::CreateDxrDescriptorHeap()
 {
-    auto device = g_Engine->Device();
+    auto device   = g_Engine->Device();
+    UINT meshCount = static_cast<UINT>(fbxModel->GetMeshes().size());
+    UINT totalSlots = SLOT_TEX_BEGIN + meshCount * SLOT_PER_MESH; // UAV + TLAS + (テクスチャ+VB+IB)×n
 
     D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
-    heapDesc.NumDescriptors = SLOT_COUNT;
+    heapDesc.NumDescriptors = totalSlots;
     heapDesc.Type           = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
     heapDesc.Flags          = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
     heapDesc.NodeMask       = 0;
 
     HRESULT hr = device->CreateDescriptorHeap(&heapDesc,
         IID_PPV_ARGS(m_dxrDescHeap.GetAddressOf()));
-    if (FAILED(hr)) {
-        DebugLog("DXRディスクリプタヒープの生成に失敗\n");
-        return false;
-    }
+    if (FAILED(hr)) { DebugLog("DXRディスクリプタヒープの生成に失敗\n"); return false; }
+
     m_dxrDescIncrementSize = device->GetDescriptorHandleIncrementSize(
         D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
@@ -587,6 +638,46 @@ bool RayTracingScene::CreateDxrDescriptorHeap()
         device->CreateShaderResourceView(nullptr, &srvDesc, cpuHandle);
     }
 
+    // メッシュごとの頂点バッファ SRV / インデックスバッファ SRV
+    // スロット配置: SLOT_TEX_BEGIN + i*SLOT_PER_MESH + {0:テクスチャ, 1:頂点, 2:インデックス}
+    // テクスチャ SRV は LoadMaterial() が書き込む
+    for (UINT i = 0; i < meshCount; i++) {
+        auto& mesh = fbxModel->GetMeshes()[i];
+
+        // 頂点バッファ: StructuredBuffer<Vertex>
+        {
+            auto cpuHandle = m_dxrDescHeap->GetCPUDescriptorHandleForHeapStart();
+            cpuHandle.ptr += (SLOT_TEX_BEGIN + i * SLOT_PER_MESH + 1) * m_dxrDescIncrementSize;
+
+            D3D12_SHADER_RESOURCE_VIEW_DESC vbDesc = {};
+            vbDesc.ViewDimension                   = D3D12_SRV_DIMENSION_BUFFER;
+            vbDesc.Shader4ComponentMapping         = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+            vbDesc.Format                          = DXGI_FORMAT_UNKNOWN;
+            vbDesc.Buffer.FirstElement             = 0;
+            vbDesc.Buffer.NumElements              = static_cast<UINT>(mesh.Vertices.size());
+            vbDesc.Buffer.StructureByteStride      = sizeof(Vertex);
+            vbDesc.Buffer.Flags                    = D3D12_BUFFER_SRV_FLAG_NONE;
+            device->CreateShaderResourceView(
+                fbxModel->GetVertexBuffers()[i]->GetResource(), &vbDesc, cpuHandle);
+        }
+
+        // インデックスバッファ: ByteAddressBuffer（32bit要素の RAW ビュー）
+        {
+            auto cpuHandle = m_dxrDescHeap->GetCPUDescriptorHandleForHeapStart();
+            cpuHandle.ptr += (SLOT_TEX_BEGIN + i * SLOT_PER_MESH + 2) * m_dxrDescIncrementSize;
+
+            D3D12_SHADER_RESOURCE_VIEW_DESC ibDesc = {};
+            ibDesc.ViewDimension                   = D3D12_SRV_DIMENSION_BUFFER;
+            ibDesc.Shader4ComponentMapping         = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+            ibDesc.Format                          = DXGI_FORMAT_R32_TYPELESS;
+            ibDesc.Buffer.FirstElement             = 0;
+            ibDesc.Buffer.NumElements              = static_cast<UINT>(mesh.Indices.size());
+            ibDesc.Buffer.Flags                    = D3D12_BUFFER_SRV_FLAG_RAW;
+            device->CreateShaderResourceView(
+                fbxModel->GetIndexBuffers()[i]->GetResource(), &ibDesc, cpuHandle);
+        }
+    }
+
     return true;
 }
 
@@ -616,19 +707,36 @@ bool RayTracingScene::BuildShaderTable()
     m_rayGenTable = makeTable(kRayGenName);
     m_missTable   = makeTable(kMissName);
 
-    // ヒットグループテーブル: メッシュ数分のレコード（全メッシュ同じシェーダー）
+    // ヒットグループテーブル: メッシュ数分のレコード
+    // 各レコード = ShaderIdentifier(32B) + GPUDescriptorHandle(8B) をアライン
     {
-        UINT64 hitTableSize = recordSize * fbxModel->GetMeshes().size();
+        // ローカルルートシグネチャのパラメータ: DescriptorTable (GPU handle 8 byte)
+        UINT64 localParamSize = sizeof(D3D12_GPU_DESCRIPTOR_HANDLE); // 8 byte
+        UINT64 hitRecordSize  = alignUp(kShaderIdentifierSize + localParamSize, kShaderRecordAlign);
+
+        UINT64 hitTableSize = hitRecordSize * fbxModel->GetMeshes().size();
         m_hitGroupTable = CreateBuffer(hitTableSize, D3D12_RESOURCE_FLAG_NONE,
                                        D3D12_RESOURCE_STATE_GENERIC_READ,
                                        D3D12_HEAP_TYPE_UPLOAD);
         uint8_t* pMapped = nullptr;
         m_hitGroupTable->Map(0, nullptr, reinterpret_cast<void**>(&pMapped));
         void* shaderId = m_rtStateObjectProps->GetShaderIdentifier(kHitGroupName);
+
         for (size_t i = 0; i < fbxModel->GetMeshes().size(); i++) {
-            memcpy(pMapped + i * recordSize, shaderId, kShaderIdentifierSize);
+            uint8_t* pRecord = pMapped + i * hitRecordSize;
+
+            // ShaderIdentifier を先頭に書き込む
+            memcpy(pRecord, shaderId, kShaderIdentifierSize);
+
+            // ローカルルートパラメータ: このメッシュのテクスチャ GPU ハンドル
+            D3D12_GPU_DESCRIPTOR_HANDLE texHandle = m_dxrDescHeap->GetGPUDescriptorHandleForHeapStart();
+            texHandle.ptr += (SLOT_TEX_BEGIN + i * SLOT_PER_MESH) * m_dxrDescIncrementSize; // 先頭=テクスチャ、続けて VB, IB
+            memcpy(pRecord + kShaderIdentifierSize, &texHandle, sizeof(texHandle));
         }
         m_hitGroupTable->Unmap(0, nullptr);
+
+        // DispatchRays で使うストライドを hitRecordSize に更新するため保持
+        m_hitGroupRecordSize = hitRecordSize;
     }
 
     return true;

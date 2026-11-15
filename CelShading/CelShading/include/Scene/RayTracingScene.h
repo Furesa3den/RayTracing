@@ -65,6 +65,7 @@ private:
     ComPtr<ID3D12Resource> m_rayGenTable;
     ComPtr<ID3D12Resource> m_missTable;
     ComPtr<ID3D12Resource> m_hitGroupTable;
+    UINT64                 m_hitGroupRecordSize = 0; // ローカルRS込みのレコードサイズ
 
     bool BuildShaderTable();
 
@@ -82,7 +83,8 @@ private:
     enum DxrHeapSlot : UINT {
         SLOT_OUTPUT_UAV  = 0,  // 出力画像 UAV
         SLOT_TLAS_SRV    = 1,  // TLAS SRV
-        SLOT_TEX_BEGIN   = 2,  // テクスチャ SRV の先頭（以降メッシュ数分続く）
+        SLOT_TEX_BEGIN   = 2,  // メッシュ用SRVの先頭
+        SLOT_PER_MESH    = 3,  // 1メッシュあたり [テクスチャ, 頂点バッファ, インデックスバッファ] の3スロット
     };
 
     bool CreateOutputBuffer();
