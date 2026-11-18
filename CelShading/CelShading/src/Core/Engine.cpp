@@ -161,7 +161,7 @@ void Engine::EndRender() {
 
 #pragma region RayTracing
 
-bool Engine::DXRSupportConf()
+bool Engine::CheckDXRSupport()
 {
 	// ── DXR サポート確認 ────────────────────────────────────────────────────
 	D3D12_FEATURE_DATA_D3D12_OPTIONS5 opts5 = {};
@@ -172,7 +172,86 @@ bool Engine::DXRSupportConf()
 		return false;
 	}
 	DebugLog("DXR Tier: %d\n", (int)opts5.RaytracingTier);
+	return true;
 }
+
+// 即時実行用のアロケータ・コマンドリスト・フェンスを生成する（初回の ExecuteImmediate で呼ばれる）
+bool Engine::CreateImmediateContext()
+{
+	auto fail = [this]() {
+		m_pImmediateList.Reset();
+		m_pImmediateAllocator.Reset();
+		m_pImmediateFence.Reset();
+		return false;
+	};
+
+	auto hr = m_pDevice->CreateCommandAllocator(
+		D3D12_COMMAND_LIST_TYPE_DIRECT,
+		IID_PPV_ARGS(m_pImmediateAllocator.ReleaseAndGetAddressOf()));
+	if (FAILED(hr)) return fail();
+
+	// DXR のコマンド（BuildRaytracingAccelerationStructure 等）が使える ID3D12GraphicsCommandList4 で生成する
+	hr = m_pDevice->CreateCommandList(
+		0,
+		D3D12_COMMAND_LIST_TYPE_DIRECT,
+		m_pImmediateAllocator.Get(),
+		nullptr,
+		IID_PPV_ARGS(m_pImmediateList.ReleaseAndGetAddressOf()));
+	if (FAILED(hr)) return fail();
+
+	// 生成直後は記録状態なので閉じておく（ExecuteImmediate 側で毎回 Reset する）
+	m_pImmediateList->Close();
+
+	hr = m_pDevice->CreateFence(
+		0,
+		D3D12_FENCE_FLAG_NONE,
+		IID_PPV_ARGS(m_pImmediateFence.ReleaseAndGetAddressOf()));
+	if (FAILED(hr)) return fail();
+
+	m_immediateFenceValue = 0;
+	return true;
+}
+
+bool Engine::ExecuteImmediate(const std::function<void(ID3D12GraphicsCommandList4*)>& record)
+{
+	// 初回だけ専用のコンテキストを生成する
+	if (!m_pImmediateList || !m_pImmediateAllocator || !m_pImmediateFence) {
+		if (!CreateImmediateContext()) {
+			DebugLog("即時実行用コンテキストの生成に失敗\n");
+			return false;
+		}
+	}
+
+	// 前回の呼び出しで完了待ちをしているため、アロケータは安全にリセットできる
+	if (FAILED(m_pImmediateAllocator->Reset())) return false;
+	if (FAILED(m_pImmediateList->Reset(m_pImmediateAllocator.Get(), nullptr))) return false;
+
+	// 呼び出し側がコマンドを記録する
+	record(m_pImmediateList.Get());
+
+	if (FAILED(m_pImmediateList->Close())) return false;
+
+	// メインのキューに投入する（描画ループの外で呼ぶ前提なので、フレームの描画と競合しない）
+	ID3D12CommandList* lists[] = { m_pImmediateList.Get() };
+	m_pQueue->ExecuteCommandLists(1, lists);
+
+	// フェンスの値を進めて、GPUが完了するまで待つ
+	const UINT64 waitValue = ++m_immediateFenceValue;
+	if (FAILED(m_pQueue->Signal(m_pImmediateFence.Get(), waitValue))) return false;
+
+	if (m_pImmediateFence->GetCompletedValue() < waitValue) {
+		HANDLE event = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+		if (event == nullptr) return false;
+
+		bool ok = SUCCEEDED(m_pImmediateFence->SetEventOnCompletion(waitValue, event))
+			&& WaitForSingleObject(event, INFINITE) == WAIT_OBJECT_0;
+		CloseHandle(event);
+		if (!ok) return false;
+	}
+
+	return true;
+}
+
 
 #pragma endregion
 

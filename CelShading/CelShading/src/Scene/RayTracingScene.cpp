@@ -56,10 +56,10 @@ bool RayTracingScene::Init()
     auto device = g_Engine->Device();
 
     // ── DXR サポート確認 ────────────────────────────────────────────────────
-    g_Engine->DXRSupportConf();
+    if (!g_Engine->CheckDXRSupport()) return false;
 
     // ── モデル読み込み ──────────────────────────────────────────────────────
-    fbxModel = new Objects::Model(L"assets/models/Alicia/Alicia_solid_Unity.FBX");
+    fbxModel = new Objects::Model(kModelFile);
 
     // テクスチャはDXRヒープ生成後にロードするため、ここではモデルデータのみ
 
@@ -72,61 +72,17 @@ bool RayTracingScene::Init()
         }
     }
 
-    // ── AS ビルド専用のコマンドリスト・キュー・フェンスを生成 ──────────────
-    // Engine の CommandAllocator / Queue は非公開のため、ビルド専用に独立して生成する
-    ComPtr<ID3D12CommandAllocator>    buildAlloc;
-    ComPtr<ID3D12GraphicsCommandList> buildCmdList;
-    ComPtr<ID3D12Fence>               buildFence;
-    HANDLE                            buildEvent = nullptr;
-
-    device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
-        IID_PPV_ARGS(buildAlloc.GetAddressOf()));
-    device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT,
-        buildAlloc.Get(), nullptr,
-        IID_PPV_ARGS(buildCmdList.GetAddressOf()));
-    device->CreateFence(0, D3D12_FENCE_FLAG_NONE,
-        IID_PPV_ARGS(buildFence.GetAddressOf()));
-    buildEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-
-    // AS ビルド用の一時コマンドキュー
-    ComPtr<ID3D12CommandQueue> buildQueue;
-    {
-        D3D12_COMMAND_QUEUE_DESC qDesc = {};
-        qDesc.Type  = D3D12_COMMAND_LIST_TYPE_DIRECT;
-        qDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-        device->CreateCommandQueue(&qDesc, IID_PPV_ARGS(buildQueue.GetAddressOf()));
-    }
-
-    // コマンド記録 → 実行 → 完了待ち を行うラムダ
-    auto submitAndWait = [&]() {
-        buildCmdList->Close();
-        ID3D12CommandList* lists[] = { buildCmdList.Get() };
-        buildQueue->ExecuteCommandLists(1, lists);
-        buildQueue->Signal(buildFence.Get(), 1);
-        buildFence->SetEventOnCompletion(1, buildEvent);
-        WaitForSingleObject(buildEvent, INFINITE);
-        // フェンスをリセットして次のビルドでも使えるようにする
-        device->CreateFence(0, D3D12_FENCE_FLAG_NONE,
-            IID_PPV_ARGS(buildFence.ReleaseAndGetAddressOf()));
-        buildAlloc->Reset();
-        buildCmdList->Reset(buildAlloc.Get(), nullptr);
-    };
-
-    // DXR コマンド発行用に ID3D12GraphicsCommandList4 を取得
-    ComPtr<ID3D12GraphicsCommandList4> dxrBuildList;
-    buildCmdList->QueryInterface(IID_PPV_ARGS(dxrBuildList.GetAddressOf()));
-    if (!dxrBuildList) {
-        DebugLog("ID3D12GraphicsCommandList4 の取得に失敗（DXR非対応ドライバ）\n");
-        CloseHandle(buildEvent);
-        return false;
-    }
-
     // ── BLAS 構築 ────────────────────────────────────────────────────────
+    // コマンドの記録・実行・完了待ちは Engine::ExecuteImmediate に任せる。
+    // ここでは各メッシュの入力情報とバッファを用意し、ビルドコマンドは後でまとめて記録する。
+    // geomDescs / blasDescs は ExecuteImmediate の間も生きている必要があるので vector で保持する。
     m_blas.resize(fbxModel->GetMeshes().size());
     std::vector<ComPtr<ID3D12Resource>> blasScratch(fbxModel->GetMeshes().size());
+    std::vector<D3D12_RAYTRACING_GEOMETRY_DESC> geomDescs(fbxModel->GetMeshes().size());
+    std::vector<D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC> blasDescs(fbxModel->GetMeshes().size());
 
     for (size_t i = 0; i < fbxModel->GetMeshes().size(); i++) {
-        D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = {};
+        auto& geomDesc = geomDescs[i]; // vector の要素なので、ポインタが ExecuteImmediate まで有効
         geomDesc.Type  = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
         geomDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
         geomDesc.Triangles.VertexBuffer.StartAddress  = fbxModel->GetVertexBuffers()[i]->GetResource()->GetGPUVirtualAddress();
@@ -158,19 +114,26 @@ bool RayTracingScene::Init()
             D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
             D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE);
 
-        D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC blasDesc = {};
+        auto& blasDesc = blasDescs[i];
         blasDesc.Inputs                           = blasInputs;
         blasDesc.DestAccelerationStructureData    = m_blas[i]->GetGPUVirtualAddress();
         blasDesc.ScratchAccelerationStructureData = blasScratch[i]->GetGPUVirtualAddress();
-
-        dxrBuildList->BuildRaytracingAccelerationStructure(&blasDesc, 0, nullptr);
-
-        // BLASビルド完了バリア（次のメッシュ or TLAS の前に保証）
-        D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(m_blas[i].Get());
-        dxrBuildList->ResourceBarrier(1, &uavBarrier);
     }
 
-    submitAndWait(); // BLASビルドを GPU で実行
+    // 全メッシュの BLAS ビルドを記録して GPU で実行し、完了まで待つ
+    bool blasOk = g_Engine->ExecuteImmediate([&](ID3D12GraphicsCommandList4* cmd) {
+        for (size_t i = 0; i < blasDescs.size(); i++) {
+            cmd->BuildRaytracingAccelerationStructure(&blasDescs[i], 0, nullptr);
+
+            // BLASビルド完了バリア（TLAS が参照する前に保証）
+            D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(m_blas[i].Get());
+            cmd->ResourceBarrier(1, &uavBarrier);
+        }
+    });
+    if (!blasOk) {
+        DebugLog("BLAS の構築に失敗\n");
+        return false;
+    }
 
     // ── TLAS 構築 ────────────────────────────────────────────────────────
     // インスタンスデスクをアップロードバッファに書き込む
@@ -223,16 +186,19 @@ bool RayTracingScene::Init()
         D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
         D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE);
 
-    // submitAndWait でリセット済みなのでそのまま記録開始できる
     D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC tlasDesc = {};
     tlasDesc.Inputs                           = tlasInputs;
     tlasDesc.DestAccelerationStructureData    = m_tlas->GetGPUVirtualAddress();
     tlasDesc.ScratchAccelerationStructureData = tlasScratch->GetGPUVirtualAddress();
 
-    dxrBuildList->BuildRaytracingAccelerationStructure(&tlasDesc, 0, nullptr);
-    submitAndWait(); // TLASビルドを GPU で実行
-
-    CloseHandle(buildEvent);
+    // TLAS ビルドを記録して GPU で実行し、完了まで待つ
+    bool tlasOk = g_Engine->ExecuteImmediate([&](ID3D12GraphicsCommandList4* cmd) {
+        cmd->BuildRaytracingAccelerationStructure(&tlasDesc, 0, nullptr);
+    });
+    if (!tlasOk) {
+        DebugLog("TLAS の構築に失敗\n");
+        return false;
+    }
 
     // ── ルートシグネチャ ────────────────────────────────────────────────────
     if (!CreateRootSignature())      { return false; }

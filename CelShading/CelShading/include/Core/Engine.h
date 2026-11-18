@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 #include <d3d12.h>
 #include <dxgi.h>
 #include <dxgi1_4.h>
@@ -17,7 +18,13 @@ public:
 	void BeginRender(); // 描画の開始処理
 	void EndRender(); // 描画の終了処理
 
-	bool DXRSupportConf(); // DXRサポート確認
+	bool CheckDXRSupport(); // DXRサポート確認
+
+	// コマンドを記録して即時実行し、GPUの完了まで待つ（初期化時のAS構築・リソース転送用）
+	// record には記録用のコマンドリストが渡される。成功したら true を返す。
+	// ・描画ループ（BeginRender～EndRender）の外で呼ぶこと
+	// ・メインスレッド専用（スレッドセーフではない）
+	bool ExecuteImmediate(const std::function<void(ID3D12GraphicsCommandList4*)>& record);
 
 public: // 外からアクセスしたいのでGetterとして公開するもの
 	ID3D12Device6* Device();
@@ -62,6 +69,13 @@ private: // 描画に使うオブジェクトとその生成関数たち
 	UINT m_DsvDescriptorSize = 0; // 深度ステンシルのディスクリプターサイズ
 	ComPtr<ID3D12DescriptorHeap> m_pDsvHeap = nullptr; // 深度ステンシルのディスクリプタヒープ
 	ComPtr<ID3D12Resource> m_pDepthStencilBuffer = nullptr; // 深度ステンシルバッファ（こっちは1つでいい）
+
+private: // ExecuteImmediate 用（初回呼び出し時に生成する）
+	bool CreateImmediateContext();
+	ComPtr<ID3D12CommandAllocator> m_pImmediateAllocator = nullptr;
+	ComPtr<ID3D12GraphicsCommandList4> m_pImmediateList = nullptr;
+	ComPtr<ID3D12Fence> m_pImmediateFence = nullptr;
+	UINT64 m_immediateFenceValue = 0;
 
 private: // 描画ループで使用するもの
 	ID3D12Resource* m_currentRenderTarget = nullptr; // 現在のフレームのレンダーターゲットを一時的に保存しておく関数

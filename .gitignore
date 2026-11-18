@@ -170,3 +170,6 @@ Testing/
 build/
 Build/
 build-*/
+
+# Visual Studio document layout
+DocumentLayout.json
