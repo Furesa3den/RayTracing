@@ -104,8 +104,8 @@ void StartApp(const TCHAR* appName)
 	if (!g_Engine->Init(g_hWnd, WINDOW_WIDTH, WINDOW_HEIGHT)) return;
 
 	// シーンの初期化
-	//g_Scene = new RayTracingScene();
-	g_Scene = new RasterScene();
+	g_Scene = new RayTracingScene();
+	//g_Scene = new RasterScene();
 	if (!g_Scene->Init()) return;
 
 	// メイン処理ループ

@@ -360,6 +360,8 @@ bool RayTracingScene::CreateRootSignature()
         samplerDesc.AddressU         = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
         samplerDesc.AddressV         = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
         samplerDesc.AddressW         = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDesc.MinLOD           = 0.0f;
+        samplerDesc.MaxLOD           = D3D12_FLOAT32_MAX; // 0のままだとミップ0に固定される。ray cone で求めた LOD を使うために必要
         samplerDesc.ShaderRegister   = 0;
         samplerDesc.RegisterSpace    = 1; // space1
         samplerDesc.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;

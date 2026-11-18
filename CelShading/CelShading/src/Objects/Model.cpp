@@ -4,6 +4,8 @@
 #include "Texture2D.h"
 
 #include <filesystem>
+#include <algorithm>
+#include <cfloat>
 namespace fs = std::filesystem;
 
 // 拡張子を置き換える処理
@@ -26,6 +28,24 @@ Objects::Model::Model(const wchar_t* filePath) {
 		DebugLog("モデル読み込みに失敗\n");
 		return;
 	}
+
+#ifdef _DEBUG
+	// 診断用: メッシュごとの頂点数・三角形数・テクスチャ・バウンディングボックスを出力する。
+	// メッシュ同士の重なり（バウンディングボックスの交差）や、テクスチャの割り当てを確認するためのもの。
+	for (size_t i = 0; i < m_meshes.size(); i++) {
+		const auto& m = m_meshes[i];
+		float mn[3] = {  FLT_MAX,  FLT_MAX,  FLT_MAX };
+		float mx[3] = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
+		for (const auto& v : m.Vertices) {
+			mn[0] = (std::min)(mn[0], v.Position.x); mx[0] = (std::max)(mx[0], v.Position.x);
+			mn[1] = (std::min)(mn[1], v.Position.y); mx[1] = (std::max)(mx[1], v.Position.y);
+			mn[2] = (std::min)(mn[2], v.Position.z); mx[2] = (std::max)(mx[2], v.Position.z);
+		}
+		DebugLog("mesh[%zu] verts=%zu tris=%zu tex=%ls bounds=(%.1f,%.1f,%.1f)-(%.1f,%.1f,%.1f)\n",
+			i, m.Vertices.size(), m.Indices.size() / 3, m.DiffuseMap.c_str(),
+			mn[0], mn[1], mn[2], mx[0], mx[1], mx[2]);
+	}
+#endif
 
 	if (!CreateVertexBuffer()) {
 		DebugLog("頂点バッファの生成に失敗\n");

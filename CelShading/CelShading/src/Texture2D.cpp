@@ -45,15 +45,33 @@ bool Texture2D::Load(std::wstring& path) {
 	ScratchImage scratch = {};
 	auto ext = FileExtension(path);
 
-	HRESULT hr = S_FALSE;
+	HRESULT hr = E_FAIL; // 未対応の拡張子は失敗として扱う
 	if (ext == L"png") // pngの時はWICFileを使う
-		LoadFromWICFile(path.c_str(), WIC_FLAGS_NONE, &meta, scratch);
+		hr = LoadFromWICFile(path.c_str(), WIC_FLAGS_NONE, &meta, scratch);
 	else if (ext == L"tga") // tgaの時はTGAFileを使う
-		LoadFromTGAFile(path.c_str(), &meta, scratch);
+		hr = LoadFromTGAFile(path.c_str(), &meta, scratch);
 
 	if (FAILED(hr)) return false;
 
-	auto img = scratch.GetImage(0, 0, 0);
+	// ミップマップを生成する（元画像が1段だけの通常の2Dテクスチャが対象）
+	// 縮小表示でも、ミップから適切な解像度を読めるようにしてエイリアシングを抑える
+	if (meta.mipLevels == 1 && meta.arraySize == 1 && meta.dimension == TEX_DIMENSION_TEXTURE2D) {
+		ScratchImage mipChain = {};
+		hr = GenerateMipMaps(
+			scratch.GetImages(),
+			scratch.GetImageCount(),
+			scratch.GetMetadata(),
+			TEX_FILTER_DEFAULT,
+			0, // 0 = 1x1 まで全段生成
+			mipChain);
+
+		if (SUCCEEDED(hr)) {
+			scratch = std::move(mipChain);
+			meta = scratch.GetMetadata();
+		}
+		// 生成に失敗した場合は、ミップなし（1段）のまま続行する
+	}
+
 	auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0);
 	auto desc = CD3DX12_RESOURCE_DESC::Tex2D(
 		meta.format,
@@ -75,15 +93,28 @@ bool Texture2D::Load(std::wstring& path) {
 
 	if (FAILED(hr)) return false;
 
-	hr = m_pResource->WriteToSubresource(
-		0,
-		nullptr, // 全領域へコピー
-		img->pixels, // 元データアドレス
-		static_cast<UINT>(img->rowPitch), // １ラインサイズ
-		static_cast<UINT>(img->slicePitch) // 全サイズ
-	);
+	// 全てのミップ（と配列スライス）を書き込む
+	for (size_t item = 0; item < meta.arraySize; ++item) {
+		for (size_t mip = 0; mip < meta.mipLevels; ++mip) {
+			const Image* img = scratch.GetImage(mip, item, 0);
+			if (img == nullptr) return false;
 
-	if (FAILED(hr)) return false;
+			hr = m_pResource->WriteToSubresource(
+				D3D12CalcSubresource(
+					static_cast<UINT>(mip),
+					static_cast<UINT>(item),
+					0,
+					static_cast<UINT>(meta.mipLevels),
+					static_cast<UINT>(meta.arraySize)),
+				nullptr, // 全領域へコピー
+				img->pixels, // 元データアドレス
+				static_cast<UINT>(img->rowPitch), // １ラインサイズ
+				static_cast<UINT>(img->slicePitch) // 全サイズ
+			);
+
+			if (FAILED(hr)) return false;
+		}
+	}
 
 	return true;
 }
@@ -115,7 +146,8 @@ Texture2D* Texture2D::GetWhite() {
 }
 
 ID3D12Resource* Texture2D::GetDefaultResource(size_t width, size_t height) {
-	auto resDesc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_R8G8B8A8_UNORM, width, height);
+	// ミップは1段だけ（省略すると全段確保され、未書き込みのミップを読んでしまう）
+	auto resDesc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_R8G8B8A8_UNORM, width, height, 1, 1);
 	auto texHeapProp = CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0);
 	ID3D12Resource* buff = nullptr;
 	auto result = g_Engine->Device()->CreateCommittedResource(
@@ -144,6 +176,6 @@ D3D12_SHADER_RESOURCE_VIEW_DESC Texture2D::ViewDesc() {
 	desc.Format = m_pResource->GetDesc().Format;
 	desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
-	desc.Texture2D.MipLevels = 1; // みっぷマップは使用しないので１
+	desc.Texture2D.MipLevels = m_pResource->GetDesc().MipLevels; // リソースが持つミップ段数をすべて使う
 	return desc;
 }
