@@ -300,33 +300,8 @@ void RayTracingScene::Draw()
     dxrCmdList->DispatchRays(&dispatchDesc);
 
     // ── 出力バッファ（UAV）→ スワップチェイン RT へコピー ──────────────────
-    // 出力バッファを COPY_SOURCE へ遷移
-    D3D12_RESOURCE_BARRIER toCopySrc = CD3DX12_RESOURCE_BARRIER::Transition(
-        m_outputBuffer.Get(),
-        D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
-        D3D12_RESOURCE_STATE_COPY_SOURCE);
-    dxrCmdList->ResourceBarrier(1, &toCopySrc);
-
-    // RT を COPY_DEST へ遷移（Engine::BeginRender 後は RENDER_TARGET 状態）
-    auto rt = g_Engine->GetCurrentRenderTarget();
-    D3D12_RESOURCE_BARRIER rtToCopyDest = CD3DX12_RESOURCE_BARRIER::Transition(
-        rt, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
-    dxrCmdList->ResourceBarrier(1, &rtToCopyDest);
-
-    // コピー実行
-    dxrCmdList->CopyResource(rt, m_outputBuffer.Get());
-
-    // RT を RENDER_TARGET に戻す（Engine::EndRender で PRESENT に遷移するため）
-    D3D12_RESOURCE_BARRIER rtToRT = CD3DX12_RESOURCE_BARRIER::Transition(
-        rt, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
-    dxrCmdList->ResourceBarrier(1, &rtToRT);
-
-    // 出力バッファを UAV に戻す
-    D3D12_RESOURCE_BARRIER toUAV = CD3DX12_RESOURCE_BARRIER::Transition(
-        m_outputBuffer.Get(),
-        D3D12_RESOURCE_STATE_COPY_SOURCE,
-        D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-    dxrCmdList->ResourceBarrier(1, &toUAV);
+    // バリアとコピーは Engine 側が行う（出力バッファは UAV 状態のまま渡す）
+    g_Engine->CopyToRenderTarget(m_outputBuffer.Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 }
 
 

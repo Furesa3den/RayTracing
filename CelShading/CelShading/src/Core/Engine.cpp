@@ -157,6 +157,41 @@ void Engine::EndRender() {
 	m_CurrentBackBufferIndex = m_pSwapChain->GetCurrentBackBufferIndex();
 }
 
+bool Engine::CopyToRenderTarget(ID3D12Resource* src, D3D12_RESOURCE_STATES srcState) {
+	// m_currentRenderTarget は BeginRender で設定される。描画ループの外では使えない
+	if (src == nullptr || m_currentRenderTarget == nullptr) return false;
+
+	ID3D12Resource* rt = m_currentRenderTarget;
+
+	// 遷移前: src を COPY_SOURCE へ、バックバッファを RENDER_TARGET → COPY_DEST へ
+	// （src がすでに COPY_SOURCE なら、同じ状態への遷移は不正なのでバリアを省く）
+	D3D12_RESOURCE_BARRIER before[2];
+	UINT beforeCount = 0;
+	if (srcState != D3D12_RESOURCE_STATE_COPY_SOURCE) {
+		before[beforeCount++] = CD3DX12_RESOURCE_BARRIER::Transition(
+			src, srcState, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	}
+	before[beforeCount++] = CD3DX12_RESOURCE_BARRIER::Transition(
+		rt, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
+	m_pCommandList->ResourceBarrier(beforeCount, before);
+
+	// コピー実行
+	m_pCommandList->CopyResource(rt, src);
+
+	// 遷移後: バックバッファを RENDER_TARGET に戻し（EndRender が PRESENT へ遷移する）、src も元の状態に戻す
+	D3D12_RESOURCE_BARRIER after[2];
+	UINT afterCount = 0;
+	after[afterCount++] = CD3DX12_RESOURCE_BARRIER::Transition(
+		rt, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	if (srcState != D3D12_RESOURCE_STATE_COPY_SOURCE) {
+		after[afterCount++] = CD3DX12_RESOURCE_BARRIER::Transition(
+			src, D3D12_RESOURCE_STATE_COPY_SOURCE, srcState);
+	}
+	m_pCommandList->ResourceBarrier(afterCount, after);
+
+	return true;
+}
+
 #pragma endregion
 
 #pragma region RayTracing

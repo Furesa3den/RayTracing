@@ -26,6 +26,14 @@ public:
 	// ・メインスレッド専用（スレッドセーフではない）
 	bool ExecuteImmediate(const std::function<void(ID3D12GraphicsCommandList4*)>& record);
 
+	// src の内容を現在のバックバッファへコピーする（DXRの出力画像などを画面へ出す用）
+	// ・BeginRender と EndRender の間で呼ぶこと（バックバッファが RENDER_TARGET 状態の間）
+	// ・src は現在 srcState の状態であること。コピー後は同じ srcState に戻す
+	// ・src とバックバッファは、サイズとフォーマットが同じであること（CopyResource の条件）
+	// ・コピー後もバックバッファは RENDER_TARGET 状態なので、続けて描画できる
+	bool CopyToRenderTarget(ID3D12Resource* src,
+		D3D12_RESOURCE_STATES srcState = D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
 public: // 外からアクセスしたいのでGetterとして公開するもの
 	ID3D12Device6* Device();
 	ID3D12GraphicsCommandList* CommandList();
