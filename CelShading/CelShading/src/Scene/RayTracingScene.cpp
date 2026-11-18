@@ -56,14 +56,7 @@ bool RayTracingScene::Init()
     auto device = g_Engine->Device();
 
     // ── DXR サポート確認 ────────────────────────────────────────────────────
-    D3D12_FEATURE_DATA_D3D12_OPTIONS5 opts5 = {};
-    if (FAILED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &opts5, sizeof(opts5)))
-        || opts5.RaytracingTier == D3D12_RAYTRACING_TIER_NOT_SUPPORTED)
-    {
-        DebugLog("このGPUはDXRに対応していません\n");
-        return false;
-    }
-    DebugLog("DXR Tier: %d\n", (int)opts5.RaytracingTier);
+    g_Engine->DXRSupportConf();
 
     // ── モデル読み込み ──────────────────────────────────────────────────────
     fbxModel = new Objects::Model(L"assets/models/Alicia/Alicia_solid_Unity.FBX");

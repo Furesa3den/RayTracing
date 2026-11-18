@@ -9,13 +9,15 @@
 
 class Engine {
 public:
-	enum { FRAME_BUFFER_COUNT = 2 }; // ダブル府バッファリングするので2
+	enum { FRAME_BUFFER_COUNT = 2 }; // ダブルバッファリングするので2
 
 public:
 	bool Init(HWND hwnd, UINT windowWidth, UINT windowHeight); // エンジン初期化
 
 	void BeginRender(); // 描画の開始処理
 	void EndRender(); // 描画の終了処理
+
+	bool DXRSupportConf(); // DXRサポート確認
 
 public: // 外からアクセスしたいのでGetterとして公開するもの
 	ID3D12Device6* Device();
