@@ -2,9 +2,9 @@
 #include "Core/Engine.h"
 #include "Core/App.h"
 #include <d3dx12.h>
-#include "SharedStruct.h"
-#include "AssimpLoader.h"
-#include "Texture2D.h"
+#include "Graphics/SharedStruct.h"
+#include "Objects/AssimpLoader.h"
+#include "Graphics/Texture2D.h"
 
 #include <filesystem>
 

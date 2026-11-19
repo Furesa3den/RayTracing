@@ -1,7 +1,7 @@
 #include "Core/App.h"
 #include "Objects/Model.h"
-#include "AssimpLoader.h"
-#include "Texture2D.h"
+#include "Objects/AssimpLoader.h"
+#include "Graphics/Texture2D.h"
 
 #include <filesystem>
 #include <algorithm>

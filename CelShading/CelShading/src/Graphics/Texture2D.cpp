@@ -1,4 +1,4 @@
-#include "Texture2D.h"
+#include "Graphics/Texture2D.h"
 #include <DirectXTex.h>
 #include "Core/Engine.h"
 

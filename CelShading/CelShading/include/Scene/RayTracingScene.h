@@ -2,11 +2,11 @@
 #include "Scene/Scene.h"
 #include "Core/Engine.h"
 #include "Objects/Model.h"
-#include "SharedStruct.h"
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
-#include "ConstantBuffer.h"
-#include "DescriptorHeap.h"
+#include "Graphics/SharedStruct.h"
+#include "Graphics/VertexBuffer.h"
+#include "Graphics/IndexBuffer.h"
+#include "Graphics/ConstantBuffer.h"
+#include "Graphics/DescriptorHeap.h"
 #include "Core/ComPtr.h"
 #include <d3d12.h>
 #include <vector>

@@ -51,9 +51,23 @@ void RayGen()
     RayPayload payload;
     payload.Color = float4(0.0f, 0.0f, 0.0f, 1.0f);
 
+    // 背面カリング: レイに対して裏向きの三角形を無視する。
+    // このモデルには、外側の面とは別に、裏返した内張りの面（スカートのチェック柄など）がある。
+    // 裏向きの面は、背面カリングが既定のUnityでは描かれない。
+    // カリングしないと、内張りが手前に出たり、外側の面と競合してノイズになる。
+    // 表面（外側）が欠けて見えるなど、副作用が出る場合は 0 にする。
+#ifndef CULL_BACK_FACES
+#define CULL_BACK_FACES 1
+#endif
+#if CULL_BACK_FACES
+    const uint rayFlags = RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
+#else
+    const uint rayFlags = RAY_FLAG_NONE;
+#endif
+
     TraceRay(
         g_TLAS,
-        RAY_FLAG_NONE,
+        rayFlags,
         0xFF,               // InstanceMask: 全インスタンス対象
         0,                  // HitGroupIndex
         1,                  // HitGroupStride

@@ -1,6 +1,6 @@
 #include "Scene/RayTracingScene.h"
 #include "Core/App.h"
-#include "AssimpLoader.h"
+#include "Objects/AssimpLoader.h"
 #include <d3dx12.h>
 #include <DirectXMath.h>
 #include <cstring>
@@ -10,7 +10,8 @@ using namespace DirectX;
 // ─────────────────────────────────────────────────────────────────────────────
 //  定数
 // ─────────────────────────────────────────────────────────────────────────────
-static const wchar_t* kModelFile = L"assets/models/Alicia/Alicia_solid_Unity.FBX";
+static const wchar_t* kFBXModelFile = L"assets/models/Alicia/Alicia_solid_Unity.FBX";
+static const wchar_t* kMMDModelFile = L"assets/models/Alicia/Alicia_solid_MMD.FBX";
 
 // シェーダーテーブル: 各レコードは ShaderIdentifier(32 byte) を
 // D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT(64 byte) にアライン
@@ -59,7 +60,7 @@ bool RayTracingScene::Init()
     if (!g_Engine->CheckDXRSupport()) return false;
 
     // ── モデル読み込み ──────────────────────────────────────────────────────
-    fbxModel = new Objects::Model(kModelFile);
+    fbxModel = new Objects::Model(kFBXModelFile);
 
     // テクスチャはDXRヒープ生成後にロードするため、ここではモデルデータのみ
 

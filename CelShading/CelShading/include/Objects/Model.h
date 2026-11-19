@@ -1,10 +1,10 @@
 #pragma once
 #include "Core/Engine.h"
 #include "Core/ComPtr.h"
-#include "SharedStruct.h"
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
-#include "DescriptorHeap.h"
+#include "Graphics/SharedStruct.h"
+#include "Graphics/VertexBuffer.h"
+#include "Graphics/IndexBuffer.h"
+#include "Graphics/DescriptorHeap.h"
 #include <d3d12.h>
 
 namespace Objects {

@@ -1,13 +1,13 @@
 #pragma once
 #include "Scene/Scene.h"
 #include "Core/Engine.h"
-#include "SharedStruct.h"
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
-#include "ConstantBuffer.h"
-#include "RootSignature.h"
-#include "PipelineState.h"
-#include "DescriptorHeap.h"
+#include "Graphics/SharedStruct.h"
+#include "Graphics/VertexBuffer.h"
+#include "Graphics/IndexBuffer.h"
+#include "Graphics/ConstantBuffer.h"
+#include "Graphics/RootSignature.h"
+#include "Graphics/PipelineState.h"
+#include "Graphics/DescriptorHeap.h"
 #include <vector>
 
 #include "Objects/Model.h"

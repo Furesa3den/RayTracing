@@ -1,4 +1,4 @@
-#include "IndexBuffer.h"
+#include "Graphics/IndexBuffer.h"
 #include <d3dx12.h>
 #include "Core/Engine.h"
 #include "Core/App.h"

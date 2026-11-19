@@ -1,5 +1,5 @@
-#include "DescriptorHeap.h"
-#include "Texture2D.h"
+#include "Graphics/DescriptorHeap.h"
+#include "Graphics/Texture2D.h"
 #include <d3dx12.h>
 #include "Core/Engine.h"
 

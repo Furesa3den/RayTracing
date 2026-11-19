@@ -168,39 +168,39 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Core\App.cpp" />
-    <ClCompile Include="src\AssimpLoader.cpp" />
-    <ClCompile Include="src\ConstantBuffer.cpp" />
-    <ClCompile Include="src\DescriptorHeap.cpp" />
+    <ClCompile Include="src\Objects\AssimpLoader.cpp" />
+    <ClCompile Include="src\Graphics\ConstantBuffer.cpp" />
+    <ClCompile Include="src\Graphics\DescriptorHeap.cpp" />
     <ClCompile Include="src\Core\Engine.cpp" />
-    <ClCompile Include="src\IndexBuffer.cpp" />
-    <ClCompile Include="src\Core\main.cpp" />
+    <ClCompile Include="src\Graphics\IndexBuffer.cpp" />
+    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Objects\Model.cpp" />
-    <ClCompile Include="src\PipelineState.cpp" />
-    <ClCompile Include="src\RootSignature.cpp" />
+    <ClCompile Include="src\Graphics\PipelineState.cpp" />
+    <ClCompile Include="src\Graphics\RootSignature.cpp" />
     <ClCompile Include="src\Scene\RasterScene.cpp" />
     <ClCompile Include="src\Scene\RayTracingScene.cpp" />
     <ClCompile Include="src\Scene\Scene.cpp" />
-    <ClCompile Include="src\SharedStruct.cpp" />
-    <ClCompile Include="src\Texture2D.cpp" />
-    <ClCompile Include="src\VertexBuffer.cpp" />
+    <ClCompile Include="src\Graphics\SharedStruct.cpp" />
+    <ClCompile Include="src\Graphics\Texture2D.cpp" />
+    <ClCompile Include="src\Graphics\VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Core\App.h" />
-    <ClInclude Include="include\AssimpLoader.h" />
+    <ClInclude Include="include\Objects\AssimpLoader.h" />
     <ClInclude Include="include\Core\ComPtr.h" />
-    <ClInclude Include="include\ConstantBuffer.h" />
-    <ClInclude Include="include\DescriptorHeap.h" />
+    <ClInclude Include="include\Graphics\ConstantBuffer.h" />
+    <ClInclude Include="include\Graphics\DescriptorHeap.h" />
     <ClInclude Include="include\Core\Engine.h" />
-    <ClInclude Include="include\IndexBuffer.h" />
+    <ClInclude Include="include\Graphics\IndexBuffer.h" />
     <ClInclude Include="include\Objects\Model.h" />
-    <ClInclude Include="include\PipelineState.h" />
+    <ClInclude Include="include\Graphics\PipelineState.h" />
     <ClInclude Include="include\Scene\RasterScene.h" />
     <ClInclude Include="include\Scene\RayTracingScene.h" />
-    <ClInclude Include="include\RootSignature.h" />
+    <ClInclude Include="include\Graphics\RootSignature.h" />
     <ClInclude Include="include\Scene\Scene.h" />
-    <ClInclude Include="include\SharedStruct.h" />
-    <ClInclude Include="include\Texture2D.h" />
-    <ClInclude Include="include\VertexBuffer.h" />
+    <ClInclude Include="include\Graphics\SharedStruct.h" />
+    <ClInclude Include="include\Graphics\Texture2D.h" />
+    <ClInclude Include="include\Graphics\VertexBuffer.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>

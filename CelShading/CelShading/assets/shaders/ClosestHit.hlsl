@@ -40,9 +40,11 @@ struct RayPayload
 //   0: 通常表示
 //   1: メッシュごとの色分け（メッシュの重なり・割り当ての確認）
 //   2: ray cone の LOD を白黒で表示（LOD 推定が効いているかの確認）
+//   3: 三角形ごとの色分け（同一メッシュ内で三角形どうしが競合していないかの確認）
+//   4: 表面（緑）/裏面（赤）の色分け
 // 変更したら ClosestHit.cso の再生成（ビルド）が必要
 #ifndef DEBUG_VIEW
-#define DEBUG_VIEW 2
+#define DEBUG_VIEW 0
 #endif
 
 // メッシュ番号から区別しやすい色を作る（黄金比で色相をずらす）
@@ -139,6 +141,19 @@ void ClosestHit(inout RayPayload payload,
 #elif DEBUG_VIEW == 2
     // ray cone で求めた LOD を白黒で表示する（LOD 8 で白）。遠い・斜めの面ほど明るくなる
     payload.Color = float4((lod / 8.0f).xxx, 1.0f);
+    return;
+#elif DEBUG_VIEW == 3
+    // 三角形ごとに色分けする（同一メッシュ内の重なりの確認用）。
+    // 三角形の形をした単色の塊がきれいに並べば、重なりはない。
+    // 三角形の色が細かい点状に入り混じっていれば、同じ位置にある三角形どうしが競合している。
+    payload.Color = float4(MeshColor(PrimitiveIndex() + InstanceID() * 100003u), 1.0f);
+    return;
+#elif DEBUG_VIEW == 4
+    // 表面（緑）と裏面（赤）を色分けする。
+    // 外側から見えるはずの場所に赤が混じっていれば、裏向きの三角形が手前に出ている。
+    payload.Color = (HitKind() == HIT_KIND_TRIANGLE_FRONT_FACE)
+        ? float4(0.0f, 0.7f, 0.0f, 1.0f)
+        : float4(1.0f, 0.0f, 0.0f, 1.0f);
     return;
 #endif
 
