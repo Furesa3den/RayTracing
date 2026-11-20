@@ -1,10 +1,8 @@
 #pragma once
 #include "Scene/Scene.h"
 #include "Core/Engine.h"
-#include "Objects/Model.h"
+#include "Objects/Objects.h"
 #include "Graphics/SharedStruct.h"
-#include "Graphics/VertexBuffer.h"
-#include "Graphics/IndexBuffer.h"
 #include "Graphics/ConstantBuffer.h"
 #include "Graphics/DescriptorHeap.h"
 #include "Core/ComPtr.h"

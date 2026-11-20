@@ -1,5 +1,4 @@
 #pragma once
-#include "Core/Engine.h"
 #include "Core/ComPtr.h"
 #include "Graphics/SharedStruct.h"
 #include "Graphics/VertexBuffer.h"

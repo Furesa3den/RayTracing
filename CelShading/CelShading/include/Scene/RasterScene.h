@@ -1,9 +1,6 @@
 #pragma once
 #include "Scene/Scene.h"
 #include "Core/Engine.h"
-#include "Graphics/SharedStruct.h"
-#include "Graphics/VertexBuffer.h"
-#include "Graphics/IndexBuffer.h"
 #include "Graphics/ConstantBuffer.h"
 #include "Graphics/RootSignature.h"
 #include "Graphics/PipelineState.h"

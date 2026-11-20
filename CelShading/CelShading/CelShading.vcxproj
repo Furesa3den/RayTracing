@@ -194,6 +194,8 @@
     <ClInclude Include="include\Graphics\IndexBuffer.h" />
     <ClInclude Include="include\Objects\Model.h" />
     <ClInclude Include="include\Graphics\PipelineState.h" />
+    <ClInclude Include="include\Objects\Models\Alicia.h" />
+    <ClInclude Include="include\Objects\Objects.h" />
     <ClInclude Include="include\Scene\RasterScene.h" />
     <ClInclude Include="include\Scene\RayTracingScene.h" />
     <ClInclude Include="include\Graphics\RootSignature.h" />

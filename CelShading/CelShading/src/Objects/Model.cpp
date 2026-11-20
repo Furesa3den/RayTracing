@@ -1,3 +1,4 @@
+#include "Core/Engine.h"
 #include "Core/App.h"
 #include "Objects/Model.h"
 #include "Objects/AssimpLoader.h"
@@ -6,6 +7,7 @@
 #include <filesystem>
 #include <algorithm>
 #include <cfloat>
+
 namespace fs = std::filesystem;
 
 // 拡張子を置き換える処理

@@ -3,16 +3,13 @@
 #include "Objects/AssimpLoader.h"
 #include <d3dx12.h>
 #include <DirectXMath.h>
-#include <cstring>
+
 
 using namespace DirectX;
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  定数
 // ─────────────────────────────────────────────────────────────────────────────
-static const wchar_t* kFBXModelFile = L"assets/models/Alicia/Alicia_solid_Unity.FBX";
-static const wchar_t* kMMDModelFile = L"assets/models/Alicia/Alicia_solid_MMD.FBX";
-
 // シェーダーテーブル: 各レコードは ShaderIdentifier(32 byte) を
 // D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT(64 byte) にアライン
 static constexpr UINT kShaderIdentifierSize = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
@@ -39,7 +36,7 @@ ComPtr<ID3D12Resource> RayTracingScene::CreateBuffer(
     D3D12_HEAP_TYPE heapType)
 {
     auto heapProp = CD3DX12_HEAP_PROPERTIES(heapType);
-    auto desc     = CD3DX12_RESOURCE_DESC::Buffer(size, flags);
+    auto desc = CD3DX12_RESOURCE_DESC::Buffer(size, flags);
 
     ComPtr<ID3D12Resource> buf;
     g_Engine->Device()->CreateCommittedResource(
@@ -60,7 +57,7 @@ bool RayTracingScene::Init()
     if (!g_Engine->CheckDXRSupport()) return false;
 
     // ── モデル読み込み ──────────────────────────────────────────────────────
-    fbxModel = new Objects::Model(kFBXModelFile);
+    fbxModel = new Objects::Models::Alicia();
 
     // テクスチャはDXRヒープ生成後にロードするため、ここではモデルデータのみ
 
