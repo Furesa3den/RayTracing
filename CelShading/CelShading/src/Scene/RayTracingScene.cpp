@@ -57,7 +57,12 @@ bool RayTracingScene::Init()
     if (!g_Engine->CheckDXRSupport()) return false;
 
     // ── モデル読み込み ──────────────────────────────────────────────────────
-    fbxModel = new Objects::Models::Alicia();
+    m_totalMeshes = 0;
+    for (UINT m = 0; m < kModelCount; m++) {
+        m_models[m]   = new Objects::Models::Alicia();
+        m_meshBase[m] = m_totalMeshes;
+        m_totalMeshes += static_cast<UINT>(m_models[m]->GetMeshes().size());
+    }
 
     // テクスチャはDXRヒープ生成後にロードするため、ここではモデルデータのみ
 
@@ -74,21 +79,28 @@ bool RayTracingScene::Init()
     // コマンドの記録・実行・完了待ちは Engine::ExecuteImmediate に任せる。
     // ここでは各メッシュの入力情報とバッファを用意し、ビルドコマンドは後でまとめて記録する。
     // geomDescs / blasDescs は ExecuteImmediate の間も生きている必要があるので vector で保持する。
-    m_blas.resize(fbxModel->GetMeshes().size());
-    std::vector<ComPtr<ID3D12Resource>> blasScratch(fbxModel->GetMeshes().size());
-    std::vector<D3D12_RAYTRACING_GEOMETRY_DESC> geomDescs(fbxModel->GetMeshes().size());
-    std::vector<D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC> blasDescs(fbxModel->GetMeshes().size());
+    // BLAS は全モデルのメッシュを通し番号 g で管理する（モデルごとに独立した BLAS を持つ）
+    m_blas.resize(m_totalMeshes);
+    std::vector<ComPtr<ID3D12Resource>> blasScratch(m_totalMeshes);
+    std::vector<D3D12_RAYTRACING_GEOMETRY_DESC> geomDescs(m_totalMeshes);
+    std::vector<D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC> blasDescs(m_totalMeshes);
 
-    for (size_t i = 0; i < fbxModel->GetMeshes().size(); i++) {
-        auto& geomDesc = geomDescs[i]; // vector の要素なので、ポインタが ExecuteImmediate まで有効
+    for (size_t g = 0; g < m_totalMeshes; g++) {
+        // 通し番号 g から、所属モデルとモデル内メッシュ番号を求める
+        UINT m = kModelCount - 1;
+        while (m > 0 && m_meshBase[m] > g) m--;
+        const size_t i = g - m_meshBase[m];
+        Objects::Model* model = m_models[m];
+
+        auto& geomDesc = geomDescs[g]; // vector の要素なので、ポインタが ExecuteImmediate まで有効
         geomDesc.Type  = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
         geomDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
-        geomDesc.Triangles.VertexBuffer.StartAddress  = fbxModel->GetVertexBuffers()[i]->GetResource()->GetGPUVirtualAddress();
+        geomDesc.Triangles.VertexBuffer.StartAddress  = model->GetVertexBuffers()[i]->GetResource()->GetGPUVirtualAddress();
         geomDesc.Triangles.VertexBuffer.StrideInBytes = sizeof(Vertex);
-        geomDesc.Triangles.VertexCount                = static_cast<UINT>(fbxModel->GetMeshes()[i].Vertices.size());
+        geomDesc.Triangles.VertexCount                = static_cast<UINT>(model->GetMeshes()[i].Vertices.size());
         geomDesc.Triangles.VertexFormat               = DXGI_FORMAT_R32G32B32_FLOAT; // Position は先頭3要素
-        geomDesc.Triangles.IndexBuffer                = fbxModel->GetIndexBuffers()[i]->GetResource()->GetGPUVirtualAddress();
-        geomDesc.Triangles.IndexCount                 = static_cast<UINT>(fbxModel->GetMeshes()[i].Indices.size());
+        geomDesc.Triangles.IndexBuffer                = model->GetIndexBuffers()[i]->GetResource()->GetGPUVirtualAddress();
+        geomDesc.Triangles.IndexCount                 = static_cast<UINT>(model->GetMeshes()[i].Indices.size());
         geomDesc.Triangles.IndexFormat                = DXGI_FORMAT_R32_UINT;
         geomDesc.Triangles.Transform3x4               = 0;
 
@@ -102,20 +114,20 @@ bool RayTracingScene::Init()
         D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO blasInfo = {};
         device->GetRaytracingAccelerationStructurePrebuildInfo(&blasInputs, &blasInfo);
 
-        blasScratch[i] = CreateBuffer(
+        blasScratch[g] = CreateBuffer(
             blasInfo.ScratchDataSizeInBytes,
             D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
             D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
-        m_blas[i] = CreateBuffer(
+        m_blas[g] = CreateBuffer(
             blasInfo.ResultDataMaxSizeInBytes,
             D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
             D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE);
 
-        auto& blasDesc = blasDescs[i];
+        auto& blasDesc = blasDescs[g];
         blasDesc.Inputs                           = blasInputs;
-        blasDesc.DestAccelerationStructureData    = m_blas[i]->GetGPUVirtualAddress();
-        blasDesc.ScratchAccelerationStructureData = blasScratch[i]->GetGPUVirtualAddress();
+        blasDesc.DestAccelerationStructureData    = m_blas[g]->GetGPUVirtualAddress();
+        blasDesc.ScratchAccelerationStructureData = blasScratch[g]->GetGPUVirtualAddress();
     }
 
     // 全メッシュの BLAS ビルドを記録して GPU で実行し、完了まで待つ
@@ -135,22 +147,30 @@ bool RayTracingScene::Init()
 
     // ── TLAS 構築 ────────────────────────────────────────────────────────
     // インスタンスデスクをアップロードバッファに書き込む
-    std::vector<D3D12_RAYTRACING_INSTANCE_DESC> instanceDescs(fbxModel->GetMeshes().size());
-    for (size_t i = 0; i < fbxModel->GetMeshes().size(); i++) {
-        auto& inst = instanceDescs[i];
-        memset(&inst, 0, sizeof(inst));
-        // 単位行列（行優先 3x4）
-        inst.Transform[0][0] = 1.0f;
-        inst.Transform[1][1] = 1.0f;
-        inst.Transform[2][2] = 1.0f;
-        inst.InstanceID                          = static_cast<UINT>(i);
-        inst.InstanceMask                        = 0xFF;
-        inst.InstanceContributionToHitGroupIndex = static_cast<UINT>(i);
-        inst.Flags                               = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
-        inst.AccelerationStructure               = m_blas[i]->GetGPUVirtualAddress();
+    // モデルごとの X 方向オフセット（1体目は左、2体目は右）
+    static constexpr float kModelOffsetX[kModelCount] = { -35.0f, 35.0f };
+
+    std::vector<D3D12_RAYTRACING_INSTANCE_DESC> instanceDescs(m_totalMeshes);
+    for (UINT m = 0; m < kModelCount; m++) {
+        const UINT meshCount = static_cast<UINT>(m_models[m]->GetMeshes().size());
+        for (UINT i = 0; i < meshCount; i++) {
+            const UINT g = m_meshBase[m] + i; // 通し番号
+            auto& inst = instanceDescs[g];
+            memset(&inst, 0, sizeof(inst));
+            // 単位行列 + X 方向の平行移動（行優先 3x4）
+            inst.Transform[0][0] = 1.0f;
+            inst.Transform[1][1] = 1.0f;
+            inst.Transform[2][2] = 1.0f;
+            inst.Transform[0][3] = kModelOffsetX[m];
+            inst.InstanceID                          = i; // モデル内メッシュ番号（デバッグ色を両モデルで揃える）
+            inst.InstanceMask                        = 0xFF;
+            inst.InstanceContributionToHitGroupIndex = g; // ヒットグループレコードは通し番号で参照
+            inst.Flags                               = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
+            inst.AccelerationStructure               = m_blas[g]->GetGPUVirtualAddress();
+        }
     }
 
-    UINT64 instanceDescSize = sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * fbxModel->GetMeshes().size();
+    UINT64 instanceDescSize = sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * m_totalMeshes;
     m_instanceDescBuffer = CreateBuffer(
         instanceDescSize,
         D3D12_RESOURCE_FLAG_NONE,
@@ -167,7 +187,7 @@ bool RayTracingScene::Init()
     D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS tlasInputs = {};
     tlasInputs.Type          = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
     tlasInputs.Flags         = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE;
-    tlasInputs.NumDescs      = static_cast<UINT>(fbxModel->GetMeshes().size());
+    tlasInputs.NumDescs      = m_totalMeshes;
     tlasInputs.DescsLayout   = D3D12_ELEMENTS_LAYOUT_ARRAY;
     tlasInputs.InstanceDescs = m_instanceDescBuffer->GetGPUVirtualAddress();
 
@@ -209,7 +229,11 @@ bool RayTracingScene::Init()
     if (!CreateDxrDescriptorHeap())  { return false; }
 
     // ── テクスチャロード（ヒープ生成後に行う） ──────────────────────────────
-    fbxModel->LoadMaterial(m_dxrDescHeap, m_dxrDescIncrementSize, SLOT_TEX_BEGIN, SLOT_PER_MESH);
+    for (UINT m = 0; m < kModelCount; m++) {
+        // モデルごとに、通し番号に対応するスロット位置からテクスチャを書き込む
+        m_models[m]->LoadMaterial(m_dxrDescHeap, m_dxrDescIncrementSize,
+                                  SLOT_TEX_BEGIN + m_meshBase[m] * SLOT_PER_MESH, SLOT_PER_MESH);
+    }
 
     // ── シェーダーテーブル ──────────────────────────────────────────────────
     if (!BuildShaderTable())         { return false; }
@@ -289,7 +313,7 @@ void RayTracingScene::Draw()
     dispatchDesc.MissShaderTable.SizeInBytes = recordSize;
     dispatchDesc.MissShaderTable.StrideInBytes = recordSize;
     dispatchDesc.HitGroupTable.StartAddress  = m_hitGroupTable->GetGPUVirtualAddress();
-    dispatchDesc.HitGroupTable.SizeInBytes   = m_hitGroupRecordSize * static_cast<UINT>(fbxModel->GetMeshes().size());
+    dispatchDesc.HitGroupTable.SizeInBytes   = m_hitGroupRecordSize * m_totalMeshes;
     dispatchDesc.HitGroupTable.StrideInBytes = m_hitGroupRecordSize;
     dispatchDesc.Width = WINDOW_WIDTH;
     dispatchDesc.Height = WINDOW_HEIGHT;
@@ -528,8 +552,7 @@ bool RayTracingScene::CreateOutputBuffer()
 bool RayTracingScene::CreateDxrDescriptorHeap()
 {
     auto device   = g_Engine->Device();
-    UINT meshCount = static_cast<UINT>(fbxModel->GetMeshes().size());
-    UINT totalSlots = SLOT_TEX_BEGIN + meshCount * SLOT_PER_MESH; // UAV + TLAS + (テクスチャ+VB+IB)×n
+    UINT totalSlots = SLOT_TEX_BEGIN + m_totalMeshes * SLOT_PER_MESH; // UAV + TLAS + (テクスチャ+VB+IB)×n
 
     D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
     heapDesc.NumDescriptors = totalSlots;
@@ -575,13 +598,18 @@ bool RayTracingScene::CreateDxrDescriptorHeap()
     // メッシュごとの頂点バッファ SRV / インデックスバッファ SRV
     // スロット配置: SLOT_TEX_BEGIN + i*SLOT_PER_MESH + {0:テクスチャ, 1:頂点, 2:インデックス}
     // テクスチャ SRV は LoadMaterial() が書き込む
-    for (UINT i = 0; i < meshCount; i++) {
-        auto& mesh = fbxModel->GetMeshes()[i];
+    for (UINT g = 0; g < m_totalMeshes; g++) {
+        // 通し番号 g から所属モデルとモデル内メッシュ番号を求める
+        UINT m = kModelCount - 1;
+        while (m > 0 && m_meshBase[m] > g) m--;
+        const UINT i = g - m_meshBase[m];
+        Objects::Model* model = m_models[m];
+        auto& mesh = model->GetMeshes()[i];
 
         // 頂点バッファ: StructuredBuffer<Vertex>
         {
             auto cpuHandle = m_dxrDescHeap->GetCPUDescriptorHandleForHeapStart();
-            cpuHandle.ptr += (SLOT_TEX_BEGIN + i * SLOT_PER_MESH + 1) * m_dxrDescIncrementSize;
+            cpuHandle.ptr += (SLOT_TEX_BEGIN + g * SLOT_PER_MESH + 1) * m_dxrDescIncrementSize;
 
             D3D12_SHADER_RESOURCE_VIEW_DESC vbDesc = {};
             vbDesc.ViewDimension                   = D3D12_SRV_DIMENSION_BUFFER;
@@ -592,13 +620,13 @@ bool RayTracingScene::CreateDxrDescriptorHeap()
             vbDesc.Buffer.StructureByteStride      = sizeof(Vertex);
             vbDesc.Buffer.Flags                    = D3D12_BUFFER_SRV_FLAG_NONE;
             device->CreateShaderResourceView(
-                fbxModel->GetVertexBuffers()[i]->GetResource(), &vbDesc, cpuHandle);
+                model->GetVertexBuffers()[i]->GetResource(), &vbDesc, cpuHandle);
         }
 
         // インデックスバッファ: ByteAddressBuffer（32bit要素の RAW ビュー）
         {
             auto cpuHandle = m_dxrDescHeap->GetCPUDescriptorHandleForHeapStart();
-            cpuHandle.ptr += (SLOT_TEX_BEGIN + i * SLOT_PER_MESH + 2) * m_dxrDescIncrementSize;
+            cpuHandle.ptr += (SLOT_TEX_BEGIN + g * SLOT_PER_MESH + 2) * m_dxrDescIncrementSize;
 
             D3D12_SHADER_RESOURCE_VIEW_DESC ibDesc = {};
             ibDesc.ViewDimension                   = D3D12_SRV_DIMENSION_BUFFER;
@@ -608,7 +636,7 @@ bool RayTracingScene::CreateDxrDescriptorHeap()
             ibDesc.Buffer.NumElements              = static_cast<UINT>(mesh.Indices.size());
             ibDesc.Buffer.Flags                    = D3D12_BUFFER_SRV_FLAG_RAW;
             device->CreateShaderResourceView(
-                fbxModel->GetIndexBuffers()[i]->GetResource(), &ibDesc, cpuHandle);
+                model->GetIndexBuffers()[i]->GetResource(), &ibDesc, cpuHandle);
         }
     }
 
@@ -648,7 +676,7 @@ bool RayTracingScene::BuildShaderTable()
         UINT64 localParamSize = sizeof(D3D12_GPU_DESCRIPTOR_HANDLE); // 8 byte
         UINT64 hitRecordSize  = alignUp(kShaderIdentifierSize + localParamSize, kShaderRecordAlign);
 
-        UINT64 hitTableSize = hitRecordSize * fbxModel->GetMeshes().size();
+        UINT64 hitTableSize = hitRecordSize * m_totalMeshes;
         m_hitGroupTable = CreateBuffer(hitTableSize, D3D12_RESOURCE_FLAG_NONE,
                                        D3D12_RESOURCE_STATE_GENERIC_READ,
                                        D3D12_HEAP_TYPE_UPLOAD);
@@ -656,7 +684,7 @@ bool RayTracingScene::BuildShaderTable()
         m_hitGroupTable->Map(0, nullptr, reinterpret_cast<void**>(&pMapped));
         void* shaderId = m_rtStateObjectProps->GetShaderIdentifier(kHitGroupName);
 
-        for (size_t i = 0; i < fbxModel->GetMeshes().size(); i++) {
+        for (size_t i = 0; i < m_totalMeshes; i++) { // i は全モデル通しのメッシュ番号
             uint8_t* pRecord = pMapped + i * hitRecordSize;
 
             // ShaderIdentifier を先頭に書き込む

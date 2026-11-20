@@ -34,7 +34,13 @@ public:
 
 private:
     // ── モデルデータ ──────────────────────────────────────────────────────────
-    Objects::Model* fbxModel;
+    // 表示するモデル数
+    static constexpr UINT kModelCount = 2;
+    Objects::Model* m_models[kModelCount] = {};
+    // 各モデルの先頭メッシュの通し番号（BLAS・ヒットグループ・ディスクリプタ共通のインデックス）
+    UINT m_meshBase[kModelCount] = {};
+    // 全モデルの合計メッシュ数
+    UINT m_totalMeshes = 0;
 
     // ── カメラ / 定数バッファ ─────────────────────────────────────────────────
     ConstantBuffer* m_rayTracingCB[Engine::FRAME_BUFFER_COUNT] = {};
